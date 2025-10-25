@@ -9,7 +9,7 @@ all: em_solver format_checker
 em_solver: startup_code.cpp
 	$(CXX) $(CXXFLAGS) -o em_solver startup_code.cpp
 
-format_checker: Format_Checker.cpp startup_code.cpp
+format_checker: Format_Checker.cpp
 	$(CXX) $(CXXFLAGS) -o format_checker Format_Checker.cpp
 
 # Run the EM solver
