@@ -144,7 +144,7 @@ network read_network(const char* filename) {
     network BayesNet;
     string line;
     ifstream myfile(filename);
-    
+
     if (!myfile.is_open()) {
         cout << "Error: Could not open file " << filename << endl;
         return BayesNet;
@@ -152,8 +152,6 @@ network read_network(const char* filename) {
 
     while (getline(myfile, line)) {
         line = trim(line);
-        
-        // Skip empty lines and comments
         if (line.empty() || line[0] == '#') {
             continue;
         }
@@ -162,134 +160,107 @@ network read_network(const char* filename) {
         string token;
         ss >> token;
 
-        // Parse variable declarations
         if (token == "variable") {
             string var_name;
             ss >> var_name;
-            
-            // Read the next line with type and values
+
             getline(myfile, line);
             stringstream ss2(line);
-            
             string type_keyword, discrete_keyword, bracket, equals;
             int num_values;
             ss2 >> type_keyword >> discrete_keyword >> bracket >> num_values >> bracket >> equals >> bracket;
-            
-            // Read values within brackets
+
             vector<string> values;
             string value;
             while (ss2 >> value) {
                 if (value == "};") break;
-                // Remove trailing comma if present
                 if (value.back() == ',') {
                     value = value.substr(0, value.length() - 1);
                 }
                 values.push_back(value);
             }
-            
+
             Graph_Node new_node(var_name, num_values, values);
             BayesNet.addNode(new_node);
         }
-        // Parse probability tables
         else if (token == "probability") {
             string paren, node_name;
             ss >> paren >> node_name;
-            
-            // Handle multi-line probability declarations
+
             string full_prob_line = line;
             while (full_prob_line.find('{') == string::npos) {
                 string next_line;
                 if (!getline(myfile, next_line)) break;
                 full_prob_line += " " + trim(next_line);
             }
-            
-            // Extract node name and parents from the probability declaration
+
             size_t start_paren = full_prob_line.find('(');
             size_t end_paren = full_prob_line.find(')');
             size_t pipe_pos = full_prob_line.find('|');
-            
+
             if (start_paren == string::npos || end_paren == string::npos) {
                 continue;
             }
-            
+
             string prob_content = full_prob_line.substr(start_paren + 1, end_paren - start_paren - 1);
             stringstream prob_ss(prob_content);
-            
             prob_ss >> node_name;
-            
+
             list<Graph_Node>::iterator listIt = BayesNet.search_node(node_name);
             int index = BayesNet.get_index(node_name);
-            
             vector<string> parents;
-            
-            // Check if there are parent nodes (conditional probability)
+
             if (pipe_pos != string::npos && pipe_pos < end_paren) {
                 string parents_str = full_prob_line.substr(pipe_pos + 1, end_paren - pipe_pos - 1);
                 stringstream parent_ss(parents_str);
                 string parent;
-                
                 while (parent_ss >> parent) {
-                    // Remove trailing comma if present
                     if (parent.back() == ',') {
                         parent = parent.substr(0, parent.length() - 1);
                     }
                     parents.push_back(parent);
-                    
                     list<Graph_Node>::iterator parentIt = BayesNet.search_node(parent);
                     parentIt->add_child(index);
                 }
+                listIt->set_Parents(parents);
             }
-            
-            listIt->set_Parents(parents);
-            
-            // Read CPT values - everything between { and };
+
             vector<float> cpt;
-            bool reading_cpt = false;
-            
             while (getline(myfile, line)) {
                 line = trim(line);
                 if (line == "};") break;
                 if (line.empty()) continue;
-                
-                // Parse the line for probability values
+
                 size_t close_paren = line.find(')');
                 string prob_part;
-                
+
                 if (close_paren != string::npos) {
-                    // Line has conditional values like "(A) 0.5, 0.5;"
                     prob_part = line.substr(close_paren + 1);
                 } else if (line.find("table") != string::npos) {
-                    // Line has "table" keyword
                     size_t table_pos = line.find("table");
                     prob_part = line.substr(table_pos + 5);
                 } else {
                     prob_part = line;
                 }
-                
-                // Extract all probability values from the line
+
                 stringstream ss_prob(prob_part);
                 string token;
                 while (ss_prob >> token) {
-                    // Remove trailing punctuation
                     while (!token.empty() && (token.back() == ',' || token.back() == ';')) {
                         token = token.substr(0, token.length() - 1);
                     }
-                    
-                    // Check if it's a valid number
                     if (!token.empty() && (isdigit(token[0]) || token[0] == '.' || token[0] == '-')) {
                         cpt.push_back(atof(token.c_str()));
                     }
                 }
             }
-            
             listIt->set_CPT(cpt);
         }
     }
-    
+
     myfile.close();
     return BayesNet;
 }
-
 
 void write_network(const char* filename, network& BayesNet) {
     ofstream outfile(filename);
@@ -303,13 +274,10 @@ void write_network(const char* filename, network& BayesNet) {
 
     int N = BayesNet.netSize();
 
-    // Write all nodes first
     for (int i = 0; i < N; i++) {
         auto node = BayesNet.get_nth_node(i);
-
         outfile << "variable " << node->get_name() << " {" << endl;
         outfile << "  type discrete [ " << node->get_nvalues() << " ] = { ";
-
         vector<string> vals = node->get_values();
         for (int j = 0; j < (int)vals.size(); j++) {
             outfile << vals[j];
@@ -319,15 +287,14 @@ void write_network(const char* filename, network& BayesNet) {
         outfile << "}" << endl;
     }
 
-    // Write probability tables
-    outfile << std::fixed << std::setprecision(6); // consistent float formatting
+    outfile << fixed << setprecision(4);
+
     for (int i = 0; i < N; i++) {
         auto node = BayesNet.get_nth_node(i);
         vector<string> parents = node->get_Parents();
         vector<string> values = node->get_values();
         vector<float> cpt = node->get_CPT();
 
-        // Header
         outfile << "probability ( " << node->get_name();
         if (!parents.empty()) {
             outfile << " | ";
@@ -338,7 +305,6 @@ void write_network(const char* filename, network& BayesNet) {
         }
         outfile << " ) {" << endl;
 
-        // compute parent radices (number of values for each parent)
         vector<int> radices;
         radices.reserve(parents.size());
         for (auto &pname : parents) {
@@ -346,16 +312,12 @@ void write_network(const char* filename, network& BayesNet) {
             radices.push_back(pnode->get_nvalues());
         }
 
-        // product of radices
         int parent_combinations = 1;
         for (int r : radices) parent_combinations *= r;
 
-        // Write the CPT values. Keep a single cpt_index that we advance in the same order read_network used
         int cpt_index = 0;
-
         if (parents.empty()) {
-            // unconditional: use table
-            outfile << "    table ";
+            outfile << "  table ";
             for (int k = 0; k < (int)values.size(); k++) {
                 if (cpt_index < (int)cpt.size()) outfile << cpt[cpt_index++];
                 else outfile << "-1";
@@ -363,10 +325,7 @@ void write_network(const char* filename, network& BayesNet) {
             }
             outfile << ";" << endl;
         } else {
-            // conditional: for each parent combination write "( v1, v2, ... ) p1, p2, ...;"
             for (int comb = 0; comb < parent_combinations; comb++) {
-                // compute mixed-radix digits (indices for each parent),
-                // with the rightmost parent cycling fastest (so we fill indices from right->left)
                 vector<int> idx(parents.size(), 0);
                 int tmp = comb;
                 for (int p = (int)parents.size() - 1; p >= 0; p--) {
@@ -374,8 +333,7 @@ void write_network(const char* filename, network& BayesNet) {
                     tmp /= radices[p];
                 }
 
-                // print parent values in the original parent order
-                outfile << "    ( ";
+                outfile << "  ( ";
                 for (int p = 0; p < (int)parents.size(); p++) {
                     auto pnode = BayesNet.search_node(parents[p]);
                     auto pvals = pnode->get_values();
@@ -385,17 +343,14 @@ void write_network(const char* filename, network& BayesNet) {
                 }
                 outfile << " ) ";
 
-                // print the probabilities for this parent combination (one probability per child value)
                 for (int k = 0; k < (int)values.size(); k++) {
-                    if (cpt_index < (int)cpt.size()) outfile << cpt[cpt_index++]; // round to last non zero decimal valu
+                    if (cpt_index < (int)cpt.size()) outfile << cpt[cpt_index++];
                     else outfile << "-1";
                     if (k < (int)values.size() - 1) outfile << ", ";
                 }
                 outfile << ";" << endl;
             }
         }
-
-        // ***** THIS IS THE FIX *****
         outfile << "};" << endl << endl;
     }
 
@@ -403,63 +358,53 @@ void write_network(const char* filename, network& BayesNet) {
     cout << "Network written to file: " << filename << endl;
 }
 
-
-
-
-
-
 #ifndef BN_LIB
 
-// Structure to hold a data record
 struct DataRecord {
-    vector<string> values;  // values[i] corresponds to variable i
-    int missing_index;      // index of missing variable, -1 if complete
-    
+    vector<string> values;
+    int missing_index;
     DataRecord(int size) : values(size), missing_index(-1) {}
 };
 
-// Parse records.dat file
 vector<DataRecord> read_records(const char* filename, network& BayesNet) {
     vector<DataRecord> records;
     ifstream file(filename);
-    
+
     if (!file.is_open()) {
         cout << "Error: Could not open " << filename << endl;
         return records;
     }
-    
+
     int num_vars = BayesNet.netSize();
     string line;
-    
+
     while (getline(file, line)) {
         DataRecord record(num_vars);
         stringstream ss(line);
         string value;
         int var_idx = 0;
-        
+
         while (getline(ss, value, ',')) {
-            // Remove quotes and trim
-            value.erase(remove(value.begin(), value.end(), '\"'), value.end());
+            value.erase(remove(value.begin(), value.end(), '"'), value.end());
             value.erase(remove(value.begin(), value.end(), ' '), value.end());
-            
+
             if (value == "?") {
                 record.missing_index = var_idx;
             }
             record.values[var_idx] = value;
             var_idx++;
         }
-        
+
         if (var_idx == num_vars) {
             records.push_back(record);
         }
     }
-    
+
     file.close();
     cout << "Loaded " << records.size() << " records" << endl;
     return records;
 }
 
-// Get value index for a variable
 int get_value_index(const vector<string>& values, const string& value) {
     for (int i = 0; i < values.size(); i++) {
         if (values[i] == value) return i;
@@ -467,244 +412,176 @@ int get_value_index(const vector<string>& values, const string& value) {
     return -1;
 }
 
-// // Initialize CPTs using complete records only with Laplace smoothing
-// void initialize_cpts(network& BayesNet, const vector<DataRecord>& records) {
-//     int num_nodes = BayesNet.netSize();
-    
-//     for (int node_idx = 0; node_idx < num_nodes; node_idx++) {
-//         auto node = BayesNet.get_nth_node(node_idx);
-//         vector<string> parents = node->get_Parents();
-//         vector<string> node_values = node->get_values();
-//         int num_values = node_values.size();
-        
-//         // Get parent information
-//         vector<int> parent_indices;
-//         vector<int> parent_sizes;
-//         for (const string& parent_name : parents) {
-//             int p_idx = BayesNet.get_index(parent_name);
-//             parent_indices.push_back(p_idx);
-//             auto p_node = BayesNet.get_nth_node(p_idx);
-//             parent_sizes.push_back(p_node->get_nvalues());
-//         }
-        
-//         // Calculate number of parent combinations
-//         int num_parent_combos = 1;
-//         for (int size : parent_sizes) {
-//             num_parent_combos *= size;
-//         }
-        
-//         // // Initialize counts with Laplace smoothing (alpha = 1)
-//         // vector<vector<double>> counts(num_parent_combos, vector<double>(num_values, 1.0));
-        
-//         // ADAPTIVE SMOOTHING: Use smaller alpha for common combinations
-//         // Start with very small pseudocount
-//         double base_alpha = 0.05;
-//         vector<vector<double>> counts(num_parent_combos, vector<double>(num_values, base_alpha));
-
-//         // Count from complete records
-//         for (const DataRecord& record : records) {
-//             if (record.missing_index != -1) continue;  // Skip incomplete records
-            
-//             // Get parent combination index
-//             int parent_combo = 0;
-//             bool valid = true;
-            
-//             if (!parents.empty()) {
-//                 int multiplier = 1;
-//                 for (int p = parent_indices.size() - 1; p >= 0; p--) {
-//                     int p_idx = parent_indices[p];
-//                     int p_val_idx = get_value_index(
-//                         BayesNet.get_nth_node(p_idx)->get_values(),
-//                         record.values[p_idx]
-//                     );
-                    
-//                     if (p_val_idx == -1) {
-//                         valid = false;
-//                         break;
-//                     }
-                    
-//                     parent_combo += p_val_idx * multiplier;
-//                     multiplier *= parent_sizes[p];
-//                 }
-//             }
-            
-//             if (!valid) continue;
-            
-//             // Get value index for this node
-//             int val_idx = get_value_index(node_values, record.values[node_idx]);
-//             if (val_idx != -1) {
-//                 counts[parent_combo][val_idx] += 1.0;
-//             }
-//         }
-        
-//         // Convert counts to probabilities
-//         vector<float> cpt;
-//         for (int combo = 0; combo < num_parent_combos; combo++) {
-//             double sum = 0.0;
-//             for (int v = 0; v < num_values; v++) {
-//                 sum += counts[combo][v];
-//             }
-//             for (int v = 0; v < num_values; v++) {
-//                 cpt.push_back(counts[combo][v] / sum);
-//             }
-//         }
-        
-//         node->set_CPT(cpt);
-//     }
-// }
-
-// STEP 1: Compute marginal distributions from complete records
-map<int, map<string, double>> compute_marginals(network& BayesNet, const vector<DataRecord>& records) {
-    map<int, map<string, double>> marginals;
-    int num_nodes = BayesNet.netSize();
-    
-    // Initialize counts
-    for (int node_idx = 0; node_idx < num_nodes; node_idx++) {
-        auto node = BayesNet.get_nth_node(node_idx);
-        vector<string> values = node->get_values();
-        for (const string& val : values) {
-            marginals[node_idx][val] = 0.1; // Small pseudocount
-        }
+// Helper function: check if missing variable is a parent
+bool is_parent_missing(const vector<int>& parent_indices, int missing_var) {
+    for (int pidx : parent_indices) {
+        if (pidx == missing_var) return true;
     }
-    
-    // Count from complete records only
-    for (const DataRecord& record : records) {
-        if (record.missing_index != -1) continue;
-        
-        for (int node_idx = 0; node_idx < num_nodes; node_idx++) {
-            marginals[node_idx][record.values[node_idx]] += 1.0;
-        }
-    }
-    
-    // Normalize to probabilities
-    for (int node_idx = 0; node_idx < num_nodes; node_idx++) {
-        double sum = 0.0;
-        for (auto& entry : marginals[node_idx]) {
-            sum += entry.second;
-        }
-        for (auto& entry : marginals[node_idx]) {
-            entry.second /= sum;
-        }
-    }
-    
-    return marginals;
+    return false;
 }
 
-// STEP 2: Initialize using ALL records with marginal-based imputation
-void initialize_cpts_improved(network& BayesNet, const vector<DataRecord>& records) {
+// Helper function: compute parent combination index
+int get_parent_combo(network& BayesNet, const vector<int>& parent_indices, 
+                     const vector<int>& parent_sizes, const DataRecord& record) {
+    if (parent_indices.empty()) return 0;
+
+    int parent_combo = 0;
+    int multiplier = 1;
+
+    for (int p = parent_indices.size() - 1; p >= 0; p--) {
+        int pidx = parent_indices[p];
+        auto pnode = BayesNet.get_nth_node(pidx);
+        int p_val_idx = get_value_index(pnode->get_values(), record.values[pidx]);
+
+        if (p_val_idx == -1) return -1;
+
+        parent_combo += p_val_idx * multiplier;
+        multiplier *= parent_sizes[p];
+    }
+
+    return parent_combo;
+}
+
+// Helper function: compute parent combo when one parent has a hypothetical value
+int get_parent_combo_with_value(network& BayesNet, const vector<int>& parent_indices, const vector<int>& parent_sizes, const DataRecord& record, int special_pos, const string& special_value) {
+    if (parent_indices.empty()) return 0;
+
+    int parent_combo = 0;
+    int multiplier = 1;
+
+    for (int p = parent_indices.size() - 1; p >= 0; p--) {
+        int pidx = parent_indices[p];
+        auto pnode = BayesNet.get_nth_node(pidx);
+
+        int p_val_idx;
+        if (p == special_pos) {
+            p_val_idx = get_value_index(pnode->get_values(), special_value);
+        } else {
+            p_val_idx = get_value_index(pnode->get_values(), record.values[pidx]);
+        }
+
+        if (p_val_idx == -1) return -1;
+
+        parent_combo += p_val_idx * multiplier;
+        multiplier *= parent_sizes[p];
+    }
+
+    return parent_combo;
+}
+
+// D-MAR Initialization: Uses incomplete records intelligently
+void initialize_cpts_dmar(network& BayesNet, const vector<DataRecord>& records) {
+    cout << "Using D-MAR initialization for better parameter estimates..." << endl;
+
     int num_nodes = BayesNet.netSize();
-    
-    cout << "Computing marginal distributions..." << endl;
-    map<int, map<string, double>> marginals = compute_marginals(BayesNet, records);
-    
+
+    // First pass: compute marginal distributions for all variables
+    // (used for weighting when a parent is missing)
+    vector<map<string, double>> marginal_counts(num_nodes);
+    vector<double> marginal_totals(num_nodes, 0.0);
+
+    for (const DataRecord& record : records) {
+        for (int var_idx = 0; var_idx < num_nodes; var_idx++) {
+            if (record.missing_index != var_idx && record.values[var_idx] != "?") {
+                marginal_counts[var_idx][record.values[var_idx]] += 1.0;
+                marginal_totals[var_idx] += 1.0;
+            }
+        }
+    }
+
+    // Second pass: estimate parameters for each node
     for (int node_idx = 0; node_idx < num_nodes; node_idx++) {
         auto node = BayesNet.get_nth_node(node_idx);
         vector<string> parents = node->get_Parents();
         vector<string> node_values = node->get_values();
         int num_values = node_values.size();
-        
+
         // Get parent information
         vector<int> parent_indices;
         vector<int> parent_sizes;
         for (const string& parent_name : parents) {
             int p_idx = BayesNet.get_index(parent_name);
             parent_indices.push_back(p_idx);
-            parent_sizes.push_back(BayesNet.get_nth_node(p_idx)->get_nvalues());
+            auto p_node = BayesNet.get_nth_node(p_idx);
+            parent_sizes.push_back(p_node->get_nvalues());
         }
-        
+
+        // Calculate number of parent combinations
         int num_parent_combos = 1;
         for (int size : parent_sizes) {
             num_parent_combos *= size;
         }
-        
-        // Use very small smoothing
+
+        // Initialize counts with small Laplace smoothing
         vector<vector<double>> counts(num_parent_combos, vector<double>(num_values, 1.0));
-        
-        // Count from ALL records
+
+        // D-MAR: Process records intelligently
         for (const DataRecord& record : records) {
-            // Skip if THIS node is missing
-            if (record.missing_index == node_idx) continue;
-            
-            // For incomplete records, we'll use marginal-weighted counts
-            bool is_incomplete = (record.missing_index != -1);
             int missing_var = record.missing_index;
-            
-            // Check if any parent is missing
-            bool parent_missing = false;
-            for (int p_idx : parent_indices) {
-                if (record.missing_index == p_idx) {
-                    parent_missing = true;
-                    break;
-                }
-            }
-            
-            if (parent_missing) {
-                // If a parent is missing, weight by marginal probability
-                for (auto& marginal_entry : marginals[missing_var]) {
-                    const string& missing_value = marginal_entry.first;
-                    double prob = marginal_entry.second;
-                    
-                    // Compute parent combo with this imputed value
-                    int parent_combo = 0;
-                    int multiplier = 1;
-                    bool valid = true;
-                    
-                    for (int p = parent_indices.size() - 1; p >= 0; p--) {
-                        int p_idx = parent_indices[p];
-                        string p_value = (p_idx == missing_var) ? missing_value : record.values[p_idx];
-                        
-                        int p_val_idx = get_value_index(
-                            BayesNet.get_nth_node(p_idx)->get_values(),
-                            p_value
-                        );
-                        
-                        if (p_val_idx == -1) {
-                            valid = false;
-                            break;
-                        }
-                        
-                        parent_combo += p_val_idx * multiplier;
-                        multiplier *= parent_sizes[p];
-                    }
-                    
-                    if (!valid) continue;
-                    
+
+            // Case 1: Complete record - use full weight
+            if (missing_var == -1) {
+                int parent_combo = get_parent_combo(BayesNet, parent_indices, parent_sizes, record);
+                if (parent_combo >= 0) {
                     int val_idx = get_value_index(node_values, record.values[node_idx]);
                     if (val_idx != -1) {
-                        counts[parent_combo][val_idx] += prob; // Weighted by marginal
+                        counts[parent_combo][val_idx] += 1.0;
                     }
                 }
-            } else {
-                // All parents observed, use full weight
-                int parent_combo = 0;
-                int multiplier = 1;
-                bool valid = true;
-                
-                for (int p = parent_indices.size() - 1; p >= 0; p--) {
-                    int p_idx = parent_indices[p];
-                    int p_val_idx = get_value_index(
-                        BayesNet.get_nth_node(p_idx)->get_values(),
-                        record.values[p_idx]
-                    );
-                    
-                    if (p_val_idx == -1) {
-                        valid = false;
+            }
+            // Case 2: This node is missing - skip
+            else if (missing_var == node_idx) {
+                continue;
+            }
+            // Case 3: One of the parents is missing - use weighted contribution
+            else if (is_parent_missing(parent_indices, missing_var)) {
+                int val_idx = get_value_index(node_values, record.values[node_idx]);
+                if (val_idx == -1) continue;
+
+                // Find which parent is missing
+                int missing_parent_pos = -1;
+                for (int p = 0; p < parent_indices.size(); p++) {
+                    if (parent_indices[p] == missing_var) {
+                        missing_parent_pos = p;
                         break;
                     }
-                    
-                    parent_combo += p_val_idx * multiplier;
-                    multiplier *= parent_sizes[p];
                 }
-                
-                if (!valid) continue;
-                
-                int val_idx = get_value_index(node_values, record.values[node_idx]);
-                if (val_idx != -1) {
-                    counts[parent_combo][val_idx] += 1.0;
+
+                // Get possible values for missing parent
+                auto missing_parent_node = BayesNet.get_nth_node(missing_var);
+                vector<string> missing_parent_values = missing_parent_node->get_values();
+
+                // Weight by marginal probability of each parent value
+                for (const string& pval : missing_parent_values) {
+                    double weight = 0.0;
+                    if (marginal_totals[missing_var] > 0) {
+                        weight = marginal_counts[missing_var][pval] / marginal_totals[missing_var];
+                    } else {
+                        weight = 1.0 / missing_parent_values.size();
+                    }
+
+                    int parent_combo = get_parent_combo_with_value(
+                        BayesNet, parent_indices, parent_sizes, record, 
+                        missing_parent_pos, pval
+                    );
+
+                    if (parent_combo >= 0) {
+                        counts[parent_combo][val_idx] += weight;
+                    }
+                }
+            }
+            // Case 4: Unrelated variable is missing - use full weight
+            else {
+                int parent_combo = get_parent_combo(BayesNet, parent_indices, parent_sizes, record);
+                if (parent_combo >= 0) {
+                    int val_idx = get_value_index(node_values, record.values[node_idx]);
+                    if (val_idx != -1) {
+                        counts[parent_combo][val_idx] += 1.0;
+                    }
                 }
             }
         }
-        
+
         // Convert counts to probabilities
         vector<float> cpt;
         for (int combo = 0; combo < num_parent_combos; combo++) {
@@ -716,279 +593,50 @@ void initialize_cpts_improved(network& BayesNet, const vector<DataRecord>& recor
                 cpt.push_back(counts[combo][v] / sum);
             }
         }
-        
         node->set_CPT(cpt);
     }
-    
-    cout << "Initialization complete using all " << records.size() << " records." << endl;
+
+    cout << "D-MAR initialization complete." << endl;
 }
 
-// Compute P(node=value | parents_values) using current CPT
-double get_probability(network& BayesNet, int node_idx, int value_idx, 
-                       const vector<int>& parent_indices, const vector<int>& parent_value_indices) {
+double get_probability(network& BayesNet, int node_idx, int value_idx,
+                      const vector<int>& parent_indices, const vector<int>& parent_value_indices) {
     auto node = BayesNet.get_nth_node(node_idx);
     vector<float> cpt = node->get_CPT();
-    
+
     if (parent_indices.empty()) {
         return cpt[value_idx];
     }
-    
-    // Calculate parent combination index
+
     vector<int> parent_sizes;
     for (int p_idx : parent_indices) {
         parent_sizes.push_back(BayesNet.get_nth_node(p_idx)->get_nvalues());
     }
-    
+
     int parent_combo = 0;
     int multiplier = 1;
     for (int p = parent_indices.size() - 1; p >= 0; p--) {
         parent_combo += parent_value_indices[p] * multiplier;
         multiplier *= parent_sizes[p];
     }
-    
+
     int num_values = node->get_nvalues();
     int cpt_idx = parent_combo * num_values + value_idx;
-    
     return (cpt_idx < cpt.size()) ? cpt[cpt_idx] : 0.0;
 }
 
-// // EM Algorithm - E-step and M-step
-// void em_iteration(network& BayesNet, const vector<DataRecord>& records) {
-//     int num_nodes = BayesNet.netSize();
-    
-//     // Storage for expected counts
-//     vector<map<int, vector<double>>> expected_counts(num_nodes);
-    
-//     // Initialize expected counts with Laplace smoothing
-//     for (int node_idx = 0; node_idx < num_nodes; node_idx++) {
-//         auto node = BayesNet.get_nth_node(node_idx);
-//         int num_values = node->get_nvalues();
-//         vector<string> parents = node->get_Parents();
-        
-//         int num_parent_combos = 1;
-//         if (!parents.empty()) {
-//             for (const string& parent_name : parents) {
-//                 int p_idx = BayesNet.get_index(parent_name);
-//                 num_parent_combos *= BayesNet.get_nth_node(p_idx)->get_nvalues();
-//             }
-//         }
-        
-//         for (int combo = 0; combo < num_parent_combos; combo++) {
-//             expected_counts[node_idx][combo] = vector<double>(num_values, 1.0);
-//         }
-//     }
-    
-//     // Process each record
-//     for (const DataRecord& record : records) {
-//         if (record.missing_index == -1) {
-//             // Complete record - add full count
-//             for (int node_idx = 0; node_idx < num_nodes; node_idx++) {
-//                 auto node = BayesNet.get_nth_node(node_idx);
-//                 vector<string> parents = node->get_Parents();
-//                 vector<string> node_values = node->get_values();
-                
-//                 // Get parent indices
-//                 vector<int> parent_indices;
-//                 vector<int> parent_sizes;
-//                 for (const string& parent_name : parents) {
-//                     int p_idx = BayesNet.get_index(parent_name);
-//                     parent_indices.push_back(p_idx);
-//                     parent_sizes.push_back(BayesNet.get_nth_node(p_idx)->get_nvalues());
-//                 }
-                
-//                 // Get parent combination
-//                 int parent_combo = 0;
-//                 if (!parents.empty()) {
-//                     int multiplier = 1;
-//                     for (int p = parent_indices.size() - 1; p >= 0; p--) {
-//                         int p_val_idx = get_value_index(
-//                             BayesNet.get_nth_node(parent_indices[p])->get_values(),
-//                             record.values[parent_indices[p]]
-//                         );
-//                         parent_combo += p_val_idx * multiplier;
-//                         multiplier *= parent_sizes[p];
-//                     }
-//                 }
-                
-//                 int val_idx = get_value_index(node_values, record.values[node_idx]);
-//                 if (val_idx != -1) {
-//                     expected_counts[node_idx][parent_combo][val_idx] += 1.0;
-//                 }
-//             }
-//         } else {
-//             // Incomplete record - E-step
-//             int missing_var = record.missing_index;
-//             auto missing_node = BayesNet.get_nth_node(missing_var);
-//             vector<string> missing_values = missing_node->get_values();
-//             vector<string> missing_parents = missing_node->get_Parents();
-            
-//             // Get parent values for missing variable
-//             vector<int> missing_parent_indices;
-//             vector<int> missing_parent_val_indices;
-            
-//             for (const string& parent_name : missing_parents) {
-//                 int p_idx = BayesNet.get_index(parent_name);
-//                 missing_parent_indices.push_back(p_idx);
-//                 int p_val_idx = get_value_index(
-//                     BayesNet.get_nth_node(p_idx)->get_values(),
-//                     record.values[p_idx]
-//                 );
-//                 missing_parent_val_indices.push_back(p_val_idx);
-//             }
-            
-//             // Calculate P(missing_var = each_value | observed) using CPT
-//             vector<double> probs(missing_values.size());
-//             double sum_probs = 0.0;
-            
-//             for (int v = 0; v < missing_values.size(); v++) {
-//                 double prob = get_probability(BayesNet, missing_var, v, 
-//                                              missing_parent_indices, missing_parent_val_indices);
-//                 probs[v] = prob;
-//                 sum_probs += prob;
-//             }
-            
-//             // Normalize probabilities
-//             if (sum_probs > 0) {
-//                 for (int v = 0; v < missing_values.size(); v++) {
-//                     probs[v] /= sum_probs;
-//                 }
-//             } else {
-//                 // Uniform if all probabilities are 0
-//                 for (int v = 0; v < missing_values.size(); v++) {
-//                     probs[v] = 1.0 / missing_values.size();
-//                 }
-//             }
-            
-//             // Add fractional counts for all variables
-//             for (int node_idx = 0; node_idx < num_nodes; node_idx++) {
-//                 auto node = BayesNet.get_nth_node(node_idx);
-//                 vector<string> parents = node->get_Parents();
-//                 vector<string> node_values = node->get_values();
-                
-//                 vector<int> parent_indices;
-//                 vector<int> parent_sizes;
-//                 for (const string& parent_name : parents) {
-//                     int p_idx = BayesNet.get_index(parent_name);
-//                     parent_indices.push_back(p_idx);
-//                     parent_sizes.push_back(BayesNet.get_nth_node(p_idx)->get_nvalues());
-//                 }
-                
-//                 if (node_idx == missing_var) {
-//                     // This is the missing variable
-//                     int parent_combo = 0;
-//                     if (!parents.empty()) {
-//                         int multiplier = 1;
-//                         for (int p = parent_indices.size() - 1; p >= 0; p--) {
-//                             int p_val_idx = get_value_index(
-//                                 BayesNet.get_nth_node(parent_indices[p])->get_values(),
-//                                 record.values[parent_indices[p]]
-//                             );
-//                             parent_combo += p_val_idx * multiplier;
-//                             multiplier *= parent_sizes[p];
-//                         }
-//                     }
-                    
-//                     for (int v = 0; v < missing_values.size(); v++) {
-//                         expected_counts[node_idx][parent_combo][v] += probs[v];
-//                     }
-//                 } else {
-//                     // Check if missing variable is a parent of this node
-//                     bool missing_is_parent = false;
-//                     int missing_parent_pos = -1;
-//                     for (int p = 0; p < parent_indices.size(); p++) {
-//                         if (parent_indices[p] == missing_var) {
-//                             missing_is_parent = true;
-//                             missing_parent_pos = p;
-//                             break;
-//                         }
-//                     }
-                    
-//                     int val_idx = get_value_index(node_values, record.values[node_idx]);
-                    
-//                     if (missing_is_parent) {
-//                         // Need to sum over possible values of missing parent
-//                         for (int mv = 0; mv < missing_values.size(); mv++) {
-//                             int parent_combo = 0;
-//                             int multiplier = 1;
-//                             for (int p = parent_indices.size() - 1; p >= 0; p--) {
-//                                 int p_val_idx;
-//                                 if (p == missing_parent_pos) {
-//                                     p_val_idx = mv;
-//                                 } else {
-//                                     p_val_idx = get_value_index(
-//                                         BayesNet.get_nth_node(parent_indices[p])->get_values(),
-//                                         record.values[parent_indices[p]]
-//                                     );
-//                                 }
-//                                 parent_combo += p_val_idx * multiplier;
-//                                 multiplier *= parent_sizes[p];
-//                             }
-                            
-//                             if (val_idx != -1) {
-//                                 expected_counts[node_idx][parent_combo][val_idx] += probs[mv];
-//                             }
-//                         }
-//                     } else {
-//                         // Missing variable is not involved
-//                         int parent_combo = 0;
-//                         if (!parents.empty()) {
-//                             int multiplier = 1;
-//                             for (int p = parent_indices.size() - 1; p >= 0; p--) {
-//                                 int p_val_idx = get_value_index(
-//                                     BayesNet.get_nth_node(parent_indices[p])->get_values(),
-//                                     record.values[parent_indices[p]]
-//                                 );
-//                                 parent_combo += p_val_idx * multiplier;
-//                                 multiplier *= parent_sizes[p];
-//                             }
-//                         }
-                        
-//                         if (val_idx != -1) {
-//                             expected_counts[node_idx][parent_combo][val_idx] += 1.0;
-//                         }
-//                     }
-//                 }
-//             }
-//         }
-//     }
-    
-//     // M-step: Update CPTs
-//     for (int node_idx = 0; node_idx < num_nodes; node_idx++) {
-//         auto node = BayesNet.get_nth_node(node_idx);
-//         int num_values = node->get_nvalues();
-        
-//         vector<float> new_cpt;
-//         for (auto& entry : expected_counts[node_idx]) {
-//             double sum = 0.0;
-//             for (double count : entry.second) {
-//                 sum += count;
-//             }
-//             for (double count : entry.second) {
-//                 new_cpt.push_back(count / sum);
-//             }
-//         }
-        
-//         node->set_CPT(new_cpt);
-//     }
-// }
-
-// IMPROVEMENT 2: Better EM iteration with adaptive smoothing
-void em_iteration(network& BayesNet, const vector<DataRecord>& records, int iteration_num = 0) {
+void em_iteration(network& BayesNet, const vector<DataRecord>& records) {
     int num_nodes = BayesNet.netSize();
-    
+
     // Storage for expected counts
     vector<map<int, vector<double>>> expected_counts(num_nodes);
-    
-    // ADAPTIVE SMOOTHING: Decrease smoothing as we get more iterations
-    double base_alpha = 1.0;
-    double alpha = base_alpha / (1.0 + 0.05 * iteration_num);
-    alpha = max(0.01, alpha);  // Floor at 0.01
+
     // Initialize expected counts with Laplace smoothing
     for (int node_idx = 0; node_idx < num_nodes; node_idx++) {
         auto node = BayesNet.get_nth_node(node_idx);
         int num_values = node->get_nvalues();
         vector<string> parents = node->get_Parents();
-        
+
         int num_parent_combos = 1;
         if (!parents.empty()) {
             for (const string& parent_name : parents) {
@@ -996,12 +644,12 @@ void em_iteration(network& BayesNet, const vector<DataRecord>& records, int iter
                 num_parent_combos *= BayesNet.get_nth_node(p_idx)->get_nvalues();
             }
         }
-        
+
         for (int combo = 0; combo < num_parent_combos; combo++) {
-            expected_counts[node_idx][combo] = vector<double>(num_values, alpha);
+            expected_counts[node_idx][combo] = vector<double>(num_values, 0.37);
         }
     }
-    
+
     // Process each record
     for (const DataRecord& record : records) {
         if (record.missing_index == -1) {
@@ -1010,7 +658,7 @@ void em_iteration(network& BayesNet, const vector<DataRecord>& records, int iter
                 auto node = BayesNet.get_nth_node(node_idx);
                 vector<string> parents = node->get_Parents();
                 vector<string> node_values = node->get_values();
-                
+
                 // Get parent indices
                 vector<int> parent_indices;
                 vector<int> parent_sizes;
@@ -1019,7 +667,7 @@ void em_iteration(network& BayesNet, const vector<DataRecord>& records, int iter
                     parent_indices.push_back(p_idx);
                     parent_sizes.push_back(BayesNet.get_nth_node(p_idx)->get_nvalues());
                 }
-                
+
                 // Get parent combination
                 int parent_combo = 0;
                 if (!parents.empty()) {
@@ -1033,7 +681,7 @@ void em_iteration(network& BayesNet, const vector<DataRecord>& records, int iter
                         multiplier *= parent_sizes[p];
                     }
                 }
-                
+
                 int val_idx = get_value_index(node_values, record.values[node_idx]);
                 if (val_idx != -1) {
                     expected_counts[node_idx][parent_combo][val_idx] += 1.0;
@@ -1045,11 +693,10 @@ void em_iteration(network& BayesNet, const vector<DataRecord>& records, int iter
             auto missing_node = BayesNet.get_nth_node(missing_var);
             vector<string> missing_values = missing_node->get_values();
             vector<string> missing_parents = missing_node->get_Parents();
-            
+
             // Get parent values for missing variable
             vector<int> missing_parent_indices;
             vector<int> missing_parent_val_indices;
-            
             for (const string& parent_name : missing_parents) {
                 int p_idx = BayesNet.get_index(parent_name);
                 missing_parent_indices.push_back(p_idx);
@@ -1059,50 +706,34 @@ void em_iteration(network& BayesNet, const vector<DataRecord>& records, int iter
                 );
                 missing_parent_val_indices.push_back(p_val_idx);
             }
-            
+
             // Calculate P(missing_var = each_value | observed) using CPT
             vector<double> probs(missing_values.size());
             double sum_probs = 0.0;
-            
-            // Get parent combination
-            int missing_parent_combo = 0;
-            if (!missing_parents.empty()) {
-                int multiplier = 1;
-                for (int p = missing_parent_indices.size() - 1; p >= 0; p--) {
-                    missing_parent_combo += missing_parent_val_indices[p] * multiplier;
-                    multiplier *= BayesNet.get_nth_node(missing_parent_indices[p])->get_nvalues();
-                }
-            }
-            
-            vector<float> cpt = missing_node->get_CPT();
             for (int v = 0; v < missing_values.size(); v++) {
-                int cpt_idx = missing_parent_combo * missing_values.size() + v;
-                if (cpt_idx < cpt.size()) {
-                    probs[v] = cpt[cpt_idx];
-                } else {
-                    probs[v] = 1.0 / missing_values.size();
-                }
-                sum_probs += probs[v];
+                double prob = get_probability(BayesNet, missing_var, v,
+                                             missing_parent_indices, missing_parent_val_indices);
+                probs[v] = prob;
+                sum_probs += prob;
             }
-            
+
             // Normalize probabilities
             if (sum_probs > 0) {
                 for (int v = 0; v < missing_values.size(); v++) {
                     probs[v] /= sum_probs;
                 }
             } else {
-                // Uniform if all probabilities are 0
                 for (int v = 0; v < missing_values.size(); v++) {
                     probs[v] = 1.0 / missing_values.size();
                 }
             }
-            
+
             // Add fractional counts for all variables
             for (int node_idx = 0; node_idx < num_nodes; node_idx++) {
                 auto node = BayesNet.get_nth_node(node_idx);
                 vector<string> parents = node->get_Parents();
                 vector<string> node_values = node->get_values();
-                
+
                 vector<int> parent_indices;
                 vector<int> parent_sizes;
                 for (const string& parent_name : parents) {
@@ -1110,11 +741,24 @@ void em_iteration(network& BayesNet, const vector<DataRecord>& records, int iter
                     parent_indices.push_back(p_idx);
                     parent_sizes.push_back(BayesNet.get_nth_node(p_idx)->get_nvalues());
                 }
-                
+
                 if (node_idx == missing_var) {
                     // This is the missing variable
+                    int parent_combo = 0;
+                    if (!parents.empty()) {
+                        int multiplier = 1;
+                        for (int p = parent_indices.size() - 1; p >= 0; p--) {
+                            int p_val_idx = get_value_index(
+                                BayesNet.get_nth_node(parent_indices[p])->get_values(),
+                                record.values[parent_indices[p]]
+                            );
+                            parent_combo += p_val_idx * multiplier;
+                            multiplier *= parent_sizes[p];
+                        }
+                    }
+
                     for (int v = 0; v < missing_values.size(); v++) {
-                        expected_counts[node_idx][missing_parent_combo][v] += probs[v];
+                        expected_counts[node_idx][parent_combo][v] += probs[v];
                     }
                 } else {
                     // Check if missing variable is a parent of this node
@@ -1127,9 +771,9 @@ void em_iteration(network& BayesNet, const vector<DataRecord>& records, int iter
                             break;
                         }
                     }
-                    
+
                     int val_idx = get_value_index(node_values, record.values[node_idx]);
-                    
+
                     if (missing_is_parent) {
                         // Need to sum over possible values of missing parent
                         for (int mv = 0; mv < missing_values.size(); mv++) {
@@ -1148,7 +792,7 @@ void em_iteration(network& BayesNet, const vector<DataRecord>& records, int iter
                                 parent_combo += p_val_idx * multiplier;
                                 multiplier *= parent_sizes[p];
                             }
-                            
+
                             if (val_idx != -1) {
                                 expected_counts[node_idx][parent_combo][val_idx] += probs[mv];
                             }
@@ -1167,7 +811,7 @@ void em_iteration(network& BayesNet, const vector<DataRecord>& records, int iter
                                 multiplier *= parent_sizes[p];
                             }
                         }
-                        
+
                         if (val_idx != -1) {
                             expected_counts[node_idx][parent_combo][val_idx] += 1.0;
                         }
@@ -1176,13 +820,13 @@ void em_iteration(network& BayesNet, const vector<DataRecord>& records, int iter
             }
         }
     }
-    
+
     // M-step: Update CPTs
     for (int node_idx = 0; node_idx < num_nodes; node_idx++) {
         auto node = BayesNet.get_nth_node(node_idx);
         int num_values = node->get_nvalues();
-        
         vector<float> new_cpt;
+
         for (auto& entry : expected_counts[node_idx]) {
             double sum = 0.0;
             for (double count : entry.second) {
@@ -1192,7 +836,6 @@ void em_iteration(network& BayesNet, const vector<DataRecord>& records, int iter
                 new_cpt.push_back(count / sum);
             }
         }
-        
         node->set_CPT(new_cpt);
     }
 }
@@ -1229,114 +872,8 @@ vector<vector<float>> save_all_cpts(network& BayesNet) {
     return all_cpts;
 }
 
-// int main() {
-//     auto start_time = chrono::high_resolution_clock::now();
-    
-//     // Read network structure
-//     network BayesNet = read_network("hailfinder.bif");
-//     cout << "Network loaded: " << BayesNet.netSize() << " nodes" << endl;
-    
-//     // Read records
-//     vector<DataRecord> records = read_records("records.dat", BayesNet);
-    
-//     // Count complete vs incomplete records
-//     int complete = 0, incomplete = 0;
-//     for (const auto& rec : records) {
-//         if (rec.missing_index == -1) complete++;
-//         else incomplete++;
-//     }
-//     cout << "Complete records: " << complete << ", Incomplete: " << incomplete << endl;
-    
-//     // Initialize CPTs
-//     cout << "Initializing CPTs from complete records..." << endl;
-//     initialize_cpts_improved(BayesNet, records);
-    
-//     // Save initial CPTs
-//     vector<vector<float>> prev_cpts = save_all_cpts(BayesNet);
-
-//     // Run EM iterations for up to 90 seconds
-//     cout << "Running EM algorithm..." << endl;
-//     int iteration = 0;
-//     const double max_time_seconds = 114.0;  // 1.9 minutes
-    
-//     // Track convergence
-//     vector<double> changes;
-//     int converged_count = 0;
-//     const double convergence_threshold = 1e-6; // Very small change threshold
-
-//     while (true) {
-//         auto current_time = chrono::high_resolution_clock::now();
-//         chrono::duration<double> elapsed = current_time - start_time;
-        
-//         if (elapsed.count() > max_time_seconds) {
-//             cout << "Time limit reached after " << iteration << " iterations" << endl;
-//             break;
-//         }
-        
-//         em_iteration(BayesNet, records, iteration);
-//         iteration++;
-        
-//         if (iteration % 10 == 0) {
-//             vector<vector<float>> current_cpts = save_all_cpts(BayesNet);
-//             double change = compute_cpt_distance(BayesNet, prev_cpts);
-//             changes.push_back(change);
-//             cout << "Completed " << iteration << " iterations (time: " 
-//                  << elapsed.count() << "s)" << endl;
-            
-//             // Check if converged
-//             if (change < convergence_threshold) {
-//                 converged_count++;
-//                 if (converged_count >= 3) {
-//                     cout << "\n*** CONVERGED: CPT changes < " << convergence_threshold 
-//                          << " for 3 consecutive checks ***" << endl;
-//                     cout << "Stopping at iteration " << iteration << endl;
-//                     break;
-//                 }
-//             } else {
-//                 converged_count = 0;
-//             }
-//             prev_cpts = current_cpts;
-//         }
-//     }
-
-//     // Print convergence analysis
-//     cout << "\n=== CONVERGENCE ANALYSIS ===" << endl;
-//     cout << "Total iterations: " << iteration << endl;
-    
-//     if (changes.size() >= 3) {
-//         cout << "CPT changes over time:" << endl;
-//         cout << "  First 10 iters: " << scientific << changes[0] << endl;
-//         if (changes.size() > 1) {
-//             cout << "  After 20 iters: " << changes[1] << endl;
-//         }
-//         if (changes.size() > 5) {
-//             cout << "  After 60 iters: " << changes[5] << endl;
-//         }
-//         cout << "  Final change:   " << changes.back() << endl;
-        
-//         // Estimate when it converged
-//         for (size_t i = 0; i < changes.size(); i++) {
-//             if (changes[i] < 1e-4) {
-//                 cout << "\nPractically converged by iteration ~" << ((i+1) * 10) << endl;
-//                 break;
-//             }
-//         }
-//     }
-
-//     // Write output
-//     cout << "Writing output to solved.bif..." << endl;
-//     write_network("solved.bif", BayesNet);
-    
-//     auto end_time = chrono::high_resolution_clock::now();
-//     chrono::duration<double> total_time = end_time - start_time;
-//     cout << "Total time: " << total_time.count() << " seconds" << endl;
-//     cout << "Done!" << endl;
-    
-//     return 0;
-// }
-
 int main() {
-    auto starttime = chrono::high_resolution_clock::now();
+    auto start_time = chrono::high_resolution_clock::now();
 
     // Read network structure
     network BayesNet = read_network("hailfinder.bif");
@@ -1353,206 +890,69 @@ int main() {
     }
     cout << "Complete records: " << complete << ", Incomplete: " << incomplete << endl;
 
-    // ===== MULTIPLE RANDOM RESTARTS IMPLEMENTATION =====
-    const int NUM_RESTARTS = 5;
-    double bestLogLikelihood = -std::numeric_limits<double>::infinity();
-    vector<vector<float>> bestCPTs;
-    int bestIteration = 0;
-    double bestTime = 0.0;
+    // Initialize CPTs with D-MAR algorithm
+    cout << "Initializing CPTs with D-MAR algorithm..." << endl;
+    initialize_cpts_dmar(BayesNet, records);
 
-    for (int restart = 0; restart < NUM_RESTARTS; restart++) {
-        cout << "\n========================================" << endl;
-        cout << "RESTART " << (restart + 1) << " / " << NUM_RESTARTS << endl;
-        cout << "========================================" << endl;
+    // Save initial CPTs for convergence checking
+    vector<vector<float>> prevcpts = save_all_cpts(BayesNet);
 
-        auto restart_start = chrono::high_resolution_clock::now();
+    // Run EM iterations
+    cout << "Running EM algorithm to refine parameters..." << endl;
+    int iteration = 0;
+    const double max_time_seconds = 114.0;  // 1.9 minutes
 
-        // Initialize CPTs
-        if (restart == 0) {
-            cout << "Initializing CPTs from complete records..." << endl;
-            initialize_cpts_improved(BayesNet, records);
-        } else {
-            // For restarts after the first, add random perturbation
-            cout << "Initializing with random perturbation..." << endl;
-            initialize_cpts_improved(BayesNet, records);
+    // Track convergence
+    vector<double> changes;
+    int convergedcount = 0;
+    const double convergencethreshold = 1e-9;
 
-            // Add random noise to CPTs
-            srand(time(NULL) + restart * 1000);
-            int numnodes = BayesNet.netSize();
+    while (true) {
+        auto current_time = chrono::high_resolution_clock::now();
+        chrono::duration<double> elapsed = current_time - start_time;
 
-            for (int nodeidx = 0; nodeidx < numnodes; nodeidx++) {
-                auto node = BayesNet.get_nth_node(nodeidx);
-                vector<float> cpt = node->get_CPT();
-                int numvalues = node->get_nvalues();
-
-                // Add ±5% random noise to each probability
-                for (size_t i = 0; i < cpt.size(); i++) {
-                    double noise = ((double)rand() / RAND_MAX) * 0.1 - 0.05; // ±5%
-                    cpt[i] = max(0.01, min(0.99, (double)cpt[i] + noise));
-                }
-
-                // Re-normalize per parent configuration
-                for (size_t combo = 0; combo < cpt.size(); combo += numvalues) {
-                    double sum = 0.0;
-                    for (int v = 0; v < numvalues; v++) {
-                        sum += cpt[combo + v];
-                    }
-                    for (int v = 0; v < numvalues; v++) {
-                        cpt[combo + v] /= sum;
-                    }
-                }
-
-                node->set_CPT(cpt);
-            }
+        if (elapsed.count() > max_time_seconds) {
+            cout << "Time limit reached after " << iteration << " iterations" << endl;
+            break;
         }
 
-        // Save initial CPTs for convergence checking
-        vector<vector<float>> prevcpts = save_all_cpts(BayesNet);
+        em_iteration(BayesNet, records);
+        iteration++;
 
-        // Run EM iterations for this restart
-        cout << "Running EM algorithm..." << endl;
-        int iteration = 0;
-        const double maxtimeseconds = 22.0; // 20 seconds per restart
+        if (iteration % 10 == 0) {
+            vector<vector<float>> currentcpts = save_all_cpts(BayesNet);
+            double change = compute_cpt_distance(BayesNet, prevcpts);
+            changes.push_back(change);
+            cout << "Completed " << iteration << " iterations (time: "
+                 << elapsed.count() << "s)" << endl;
 
-        // Track convergence
-        vector<double> changes;
-        int convergedcount = 0;
-        const double convergencethreshold = 1e-6;
-
-        while (true) {
-            auto currenttime = chrono::high_resolution_clock::now();
-            chrono::duration<double> elapsed = currenttime - restart_start;
-            if (elapsed.count() > maxtimeseconds) {
-                cout << "Time limit reached after " << iteration << " iterations" << endl;
-                break;
+            // Check if converged
+            if (change < convergencethreshold) {
+                convergedcount++;
+                if (convergedcount >= 3) {
+                    cout << "\n*** CONVERGED: CPT changes < " << convergencethreshold 
+                            << " for 3 consecutive checks ***" << endl;
+                    cout << "Stopping at iteration " << iteration << endl;
+                    break;
+                }
+            } else {
+                convergedcount = 0;
             }
 
-            em_iteration(BayesNet, records, iteration);
-            iteration++;
-
-            if (iteration % 10 == 0) {
-                vector<vector<float>> currentcpts = save_all_cpts(BayesNet);
-                double change = compute_cpt_distance(BayesNet, prevcpts);
-                changes.push_back(change);
-
-                cout << "Completed " << iteration << " iterations (time: " 
-                     << elapsed.count() << "s)" << endl;
-
-                // Check if converged
-                if (change < convergencethreshold) {
-                    convergedcount++;
-                    if (convergedcount >= 3) {
-                        cout << "\n*** CONVERGED: CPT changes < " << convergencethreshold 
-                             << " for 3 consecutive checks ***" << endl;
-                        cout << "Stopping at iteration " << iteration << endl;
-                        break;
-                    }
-                } else {
-                    convergedcount = 0;
-                }
-
-                prevcpts = currentcpts;
-            }
+            prevcpts = currentcpts;
         }
-
-        auto restart_end = chrono::high_resolution_clock::now();
-        chrono::duration<double> restart_time = restart_end - restart_start;
-
-        // Compute log-likelihood for this solution using complete records
-        double logLikelihood = 0.0;
-        int count = 0;
-
-        for (const auto& record : records) {
-            if (record.missing_index != -1) continue; // Skip incomplete records
-
-            double recordProb = 1.0;
-            int numnodes = BayesNet.netSize();
-
-            for (int nodeidx = 0; nodeidx < numnodes; nodeidx++) {
-                auto node = BayesNet.get_nth_node(nodeidx);
-                vector<string> parents = node->get_Parents();
-                vector<string> nodevalues = node->get_values();
-                vector<float> cpt = node->get_CPT();
-
-                // Get parent indices and values
-                vector<int> parentindices;
-                vector<int> parentsizes;
-                for (const string& parentname : parents) {
-                    int pidx = BayesNet.get_index(parentname);
-                    parentindices.push_back(pidx);
-                    parentsizes.push_back(BayesNet.get_nth_node(pidx)->get_nvalues());
-                }
-
-                // Calculate parent combination
-                int parentcombo = 0;
-                if (!parents.empty()) {
-                    int multiplier = 1;
-                    for (int p = parentindices.size() - 1; p >= 0; p--) {
-                        int pvalidx = get_value_index(BayesNet.get_nth_node(parentindices[p])->get_values(),
-                                                    record.values[parentindices[p]]);
-                        parentcombo += pvalidx * multiplier;
-                        multiplier *= parentsizes[p];
-                    }
-                }
-
-                // Get value index for this node
-                int validx = get_value_index(nodevalues, record.values[nodeidx]);
-                if (validx != -1) {
-                    int numvalues = node->get_nvalues();
-                    int cptidx = parentcombo * numvalues + validx;
-                    if (cptidx < cpt.size()) {
-                        double prob = max(1e-10, (double)cpt[cptidx]); // Avoid log(0)
-                        recordProb *= prob;
-                    }
-                }
-            }
-
-            logLikelihood += log(recordProb);
-            count++;
-        }
-
-        cout << "\n=== RESTART " << (restart + 1) << " SUMMARY ===" << endl;
-        cout << "Iterations: " << iteration << endl;
-        cout << "Time: " << restart_time.count() << " seconds" << endl;
-        cout << "Log-likelihood (on " << count << " complete records): " 
-             << fixed << setprecision(6) << logLikelihood << endl;
-        cout << "Average log-likelihood per record: " 
-             << logLikelihood / count << endl;
-
-        // Check if this is the best solution
-        if (logLikelihood > bestLogLikelihood) {
-            bestLogLikelihood = logLikelihood;
-            bestCPTs = save_all_cpts(BayesNet);
-            bestIteration = iteration;
-            bestTime = restart_time.count();
-            cout << "*** NEW BEST SOLUTION FOUND! ***" << endl;
-        }
-    }
-
-    // Restore best CPTs
-    cout << "\n========================================" << endl;
-    cout << "RESTORING BEST SOLUTION" << endl;
-    cout << "========================================" << endl;
-    cout << "Best log-likelihood: " << fixed << setprecision(6) << bestLogLikelihood << endl;
-    cout << "Best iterations: " << bestIteration << endl;
-    cout << "Best time: " << bestTime << " seconds" << endl;
-
-    int numnodes = BayesNet.netSize();
-    for (int i = 0; i < numnodes; i++) {
-        BayesNet.get_nth_node(i)->set_CPT(bestCPTs[i]);
     }
 
     // Write output
-    cout << "\nWriting output to solved.bif..." << endl;
+    cout << "Writing output to solved.bif..." << endl;
     write_network("solved.bif", BayesNet);
 
-    auto endtime = chrono::high_resolution_clock::now();
-    chrono::duration<double> totaltime = endtime - starttime;
-    cout << "Total time: " << scientific << totaltime.count() << " seconds" << endl;
+    auto end_time = chrono::high_resolution_clock::now();
+    chrono::duration<double> total_time = end_time - start_time;
+    cout << "Total time: " << total_time.count() << " seconds" << endl;
     cout << "Done!" << endl;
 
     return 0;
 }
-
 
 #endif // BN_LIB
