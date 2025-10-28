@@ -1,0 +1,1423 @@
+// Bayesian Network
+
+variable N0_7muVerMo {
+  type discrete [ 4 ] = { StrongUp, WeakUp, Neutral, Down };
+}
+variable SubjVertMo {
+  type discrete [ 4 ] = { StronUp, WeakUp, Neutral, Down };
+}
+variable QGVertMotion {
+  type discrete [ 4 ] = { StrongUp, WeakUp, Neutral, Down };
+}
+variable CombVerMo {
+  type discrete [ 4 ] = { StrongUp, WeakUp, Neutral, Down };
+}
+variable AreaMeso_ALS {
+  type discrete [ 4 ] = { StrongUp, WeakUp, Neutral, Down };
+}
+variable SatContMoist {
+  type discrete [ 4 ] = { VeryWet, Wet, Neutral, Dry };
+}
+variable RaoContMoist {
+  type discrete [ 4 ] = { VeryWet, Wet, Neutral, Dry };
+}
+variable CombMoisture {
+  type discrete [ 4 ] = { VeryWet, Wet, Neutral, Dry };
+}
+variable AreaMoDryAir {
+  type discrete [ 4 ] = { VeryWet, Wet, Neutral, Dry };
+}
+variable VISCloudCov {
+  type discrete [ 3 ] = { Cloudy, PC, Clear };
+}
+variable IRCloudCover {
+  type discrete [ 3 ] = { Cloudy, PC, Clear };
+}
+variable CombClouds {
+  type discrete [ 3 ] = { Cloudy, PC, Clear };
+}
+variable CldShadeOth {
+  type discrete [ 3 ] = { Cloudy, PC, Clear };
+}
+variable AMInstabMt {
+  type discrete [ 3 ] = { None, Weak, Strong };
+}
+variable InsInMt {
+  type discrete [ 3 ] = { None, Weak, Strong };
+}
+variable WndHodograph {
+  type discrete [ 4 ] = { DCVZFavor, StrongWest, Westerly, Other };
+}
+variable OutflowFrMt {
+  type discrete [ 3 ] = { None, Weak, Strong };
+}
+variable MorningBound {
+  type discrete [ 3 ] = { None, Weak, Strong };
+}
+variable Boundaries {
+  type discrete [ 3 ] = { None, Weak, Strong };
+}
+variable CldShadeConv {
+  type discrete [ 3 ] = { None, Some, Marked };
+}
+variable CompPlFcst {
+  type discrete [ 3 ] = { IncCapDecIns, LittleChange, DecCapIncIns };
+}
+variable CapChange {
+  type discrete [ 3 ] = { Decreasing, LittleChange, Increasing };
+}
+variable LoLevMoistAd {
+  type discrete [ 4 ] = { StrongPos, WeakPos, Neutral, Negative };
+}
+variable InsChange {
+  type discrete [ 3 ] = { Decreasing, LittleChange, Increasing };
+}
+variable MountainFcst {
+  type discrete [ 3 ] = { XNIL, SIG, SVR };
+}
+variable Date {
+  type discrete [ 6 ] = { May15_Jun14, Jun15_Jul1, Jul2_Jul15, Jul16_Aug10, Aug11_Aug20, Aug20_Sep15 };
+}
+variable Scenario {
+  type discrete [ 11 ] = { A, B, C, D, E, F, G, H, I, J, K };
+}
+variable ScenRelAMCIN {
+  type discrete [ 2 ] = { AB, CThruK };
+}
+variable MorningCIN {
+  type discrete [ 4 ] = { None, PartInhibit, Stifling, TotalInhibit };
+}
+variable AMCINInScen {
+  type discrete [ 3 ] = { LessThanAve, Average, MoreThanAve };
+}
+variable CapInScen {
+  type discrete [ 3 ] = { LessThanAve, Average, MoreThanAve };
+}
+variable ScenRelAMIns {
+  type discrete [ 6 ] = { ABI, CDEJ, F, G, H, K };
+}
+variable LIfr12ZDENSd {
+  type discrete [ 4 ] = { LIGt0, N1GtLIGt_4, N5GtLIGt_8, LILt_8 };
+}
+variable AMDewptCalPl {
+  type discrete [ 3 ] = { Instability, Neutral, Stability };
+}
+variable AMInsWliScen {
+  type discrete [ 3 ] = { LessUnstable, Average, MoreUnstable };
+}
+variable InsSclInScen {
+  type discrete [ 3 ] = { LessUnstable, Average, MoreUnstable };
+}
+variable ScenRel3_4 {
+  type discrete [ 5 ] = { ACEFK, B, D, GJ, HI };
+}
+variable LatestCIN {
+  type discrete [ 4 ] = { None, PartInhibit, Stifling, TotalInhibit };
+}
+variable LLIW {
+  type discrete [ 4 ] = { Unfavorable, Weak, Moderate, Strong };
+}
+variable CurPropConv {
+  type discrete [ 4 ] = { None, Slight, Moderate, Strong };
+}
+variable ScnRelPlFcst {
+  type discrete [ 11 ] = { A, B, C, D, E, F, G, H, I, J, K };
+}
+variable PlainsFcst {
+  type discrete [ 3 ] = { XNIL, SIG, SVR };
+}
+variable N34StarFcst {
+  type discrete [ 3 ] = { XNIL, SIG, SVR };
+}
+variable R5Fcst {
+  type discrete [ 3 ] = { XNIL, SIG, SVR };
+}
+variable Dewpoints {
+  type discrete [ 7 ] = { LowEvrywhere, LowAtStation, LowSHighN, LowNHighS, LowMtsHighPl, HighEvrywher, Other };
+}
+variable LowLLapse {
+  type discrete [ 4 ] = { CloseToDryAd, Steep, ModerateOrLe, Stable };
+}
+variable MeanRH {
+  type discrete [ 3 ] = { VeryMoist, Average, Dry };
+}
+variable MidLLapse {
+  type discrete [ 3 ] = { CloseToDryAd, Steep, ModerateOrLe };
+}
+variable MvmtFeatures {
+  type discrete [ 4 ] = { StrongFront, MarkedUpper, OtherRapid, NoMajor };
+}
+variable RHRatio {
+  type discrete [ 3 ] = { MoistMDryL, DryMMoistL, Other };
+}
+variable SfcWndShfDis {
+  type discrete [ 7 ] = { DenvCyclone, E_W_N, E_W_S, MovingFtorOt, DryLine, None, Other };
+}
+variable SynForcng {
+  type discrete [ 5 ] = { SigNegative, NegToPos, SigPositive, PosToNeg, LittleChange };
+}
+variable TempDis {
+  type discrete [ 4 ] = { QStationary, Moving, None, Other };
+}
+variable WindAloft {
+  type discrete [ 4 ] = { LV, SWQuad, NWQuad, AllElse };
+}
+variable WindFieldMt {
+  type discrete [ 2 ] = { Westerly, LVorOther };
+}
+variable WindFieldPln {
+  type discrete [ 6 ] = { LV, DenvCyclone, LongAnticyc, E_NE, SEQuad, WidespdDnsl };
+}
+probability ( N0_7muVerMo ) {
+    table 0.077855, 0.674054, 0.229245, 0.018846;
+};
+
+probability ( SubjVertMo ) {
+    table 0.392477, 0.328374, 0.157839, 0.121311;
+};
+
+probability ( QGVertMotion ) {
+    table 0.062638, 0.415695, 0.129008, 0.392659;
+};
+
+probability ( CombVerMo | N0_7muVerMo, SubjVertMo, QGVertMotion ) {
+    ( StrongUp, StronUp, StrongUp ) 0.461933, 0.151701, 0.334187, 0.052179;
+    ( StrongUp, StronUp, WeakUp ) 0.028906, 0.706075, 0.167230, 0.097790;
+    ( StrongUp, StronUp, Neutral ) 0.085263, 0.061549, 0.637201, 0.215987;
+    ( StrongUp, StronUp, Down ) 0.346902, 0.482693, 0.130380, 0.040025;
+    ( StrongUp, WeakUp, StrongUp ) 0.076500, 0.453982, 0.147563, 0.321955;
+    ( StrongUp, WeakUp, WeakUp ) 0.103110, 0.489857, 0.142073, 0.264960;
+    ( StrongUp, WeakUp, Neutral ) 0.202407, 0.231341, 0.232889, 0.333363;
+    ( StrongUp, WeakUp, Down ) 0.085873, 0.033357, 0.626552, 0.254218;
+    ( StrongUp, Neutral, StrongUp ) 0.032857, 0.337223, 0.456011, 0.173908;
+    ( StrongUp, Neutral, WeakUp ) 0.095228, 0.302574, 0.498469, 0.103729;
+    ( StrongUp, Neutral, Neutral ) 0.478029, 0.144865, 0.014582, 0.362524;
+    ( StrongUp, Neutral, Down ) 0.004907, 0.262910, 0.464302, 0.267881;
+    ( StrongUp, Down, StrongUp ) 0.587264, 0.059901, 0.171016, 0.181819;
+    ( StrongUp, Down, WeakUp ) 0.331180, 0.538899, 0.098045, 0.031876;
+    ( StrongUp, Down, Neutral ) 0.040676, 0.417678, 0.264247, 0.277399;
+    ( StrongUp, Down, Down ) 0.116528, 0.447908, 0.321915, 0.113649;
+    ( WeakUp, StronUp, StrongUp ) 0.199656, 0.107656, 0.392799, 0.299889;
+    ( WeakUp, StronUp, WeakUp ) 0.181652, 0.316610, 0.478895, 0.022842;
+    ( WeakUp, StronUp, Neutral ) 0.189507, 0.230939, 0.278221, 0.301333;
+    ( WeakUp, StronUp, Down ) 0.230044, 0.093260, 0.143921, 0.532774;
+    ( WeakUp, WeakUp, StrongUp ) 0.253095, 0.044634, 0.223203, 0.479068;
+    ( WeakUp, WeakUp, WeakUp ) 0.089068, 0.422911, 0.207388, 0.280634;
+    ( WeakUp, WeakUp, Neutral ) 0.210215, 0.504132, 0.202720, 0.082933;
+    ( WeakUp, WeakUp, Down ) 0.444069, 0.233459, 0.223702, 0.098770;
+    ( WeakUp, Neutral, StrongUp ) 0.147825, 0.092050, 0.182070, 0.578056;
+    ( WeakUp, Neutral, WeakUp ) 0.043852, 0.089179, 0.091067, 0.775901;
+    ( WeakUp, Neutral, Neutral ) 0.416357, 0.020760, 0.005459, 0.557425;
+    ( WeakUp, Neutral, Down ) 0.121449, 0.272488, 0.339701, 0.266361;
+    ( WeakUp, Down, StrongUp ) 0.374780, 0.300319, 0.171560, 0.153340;
+    ( WeakUp, Down, WeakUp ) 0.151927, 0.386196, 0.243604, 0.218273;
+    ( WeakUp, Down, Neutral ) 0.533134, 0.043356, 0.109136, 0.314374;
+    ( WeakUp, Down, Down ) 0.561930, 0.173889, 0.147265, 0.116916;
+    ( Neutral, StronUp, StrongUp ) 0.328978, 0.408106, 0.253211, 0.009705;
+    ( Neutral, StronUp, WeakUp ) 0.108029, 0.127732, 0.614966, 0.149273;
+    ( Neutral, StronUp, Neutral ) 0.039949, 0.272222, 0.167797, 0.520032;
+    ( Neutral, StronUp, Down ) 0.631651, 0.058104, 0.163972, 0.146273;
+    ( Neutral, WeakUp, StrongUp ) 0.125160, 0.190200, 0.344821, 0.339819;
+    ( Neutral, WeakUp, WeakUp ) 0.078016, 0.546178, 0.277197, 0.098609;
+    ( Neutral, WeakUp, Neutral ) 0.075610, 0.218715, 0.694044, 0.011632;
+    ( Neutral, WeakUp, Down ) 0.294712, 0.098086, 0.227141, 0.380061;
+    ( Neutral, Neutral, StrongUp ) 0.369830, 0.043348, 0.578643, 0.008179;
+    ( Neutral, Neutral, WeakUp ) 0.255558, 0.309496, 0.201175, 0.233771;
+    ( Neutral, Neutral, Neutral ) 0.421956, 0.236290, 0.090325, 0.251429;
+    ( Neutral, Neutral, Down ) 0.195827, 0.324368, 0.095379, 0.384425;
+    ( Neutral, Down, StrongUp ) 0.189167, 0.186949, 0.428924, 0.194960;
+    ( Neutral, Down, WeakUp ) 0.039386, 0.245808, 0.068149, 0.646657;
+    ( Neutral, Down, Neutral ) 0.251166, 0.084669, 0.598422, 0.065743;
+    ( Neutral, Down, Down ) 0.087114, 0.731972, 0.006527, 0.174387;
+    ( Down, StronUp, StrongUp ) 0.085253, 0.060981, 0.782191, 0.071575;
+    ( Down, StronUp, WeakUp ) 0.095211, 0.224066, 0.199120, 0.481603;
+    ( Down, StronUp, Neutral ) 0.475639, 0.172050, 0.022956, 0.329355;
+    ( Down, StronUp, Down ) 0.556687, 0.142042, 0.278831, 0.022440;
+    ( Down, WeakUp, StrongUp ) 0.029118, 0.154325, 0.031478, 0.785080;
+    ( Down, WeakUp, WeakUp ) 0.461358, 0.021142, 0.403851, 0.113649;
+    ( Down, WeakUp, Neutral ) 0.033285, 0.324936, 0.035983, 0.605796;
+    ( Down, WeakUp, Down ) 0.037900, 0.010030, 0.792891, 0.159179;
+    ( Down, Neutral, StrongUp ) 0.655660, 0.250000, 0.047170, 0.047170;
+    ( Down, Neutral, WeakUp ) 0.042342, 0.027267, 0.350603, 0.579787;
+    ( Down, Neutral, Neutral ) 0.140191, 0.121913, 0.112774, 0.625121;
+    ( Down, Neutral, Down ) 0.033245, 0.442007, 0.324156, 0.200592;
+    ( Down, Down, StrongUp ) 0.240265, 0.259735, 0.240265, 0.259735;
+    ( Down, Down, WeakUp ) 0.255268, 0.250288, 0.137754, 0.356690;
+    ( Down, Down, Neutral ) 0.090482, 0.077863, 0.418982, 0.412673;
+    ( Down, Down, Down ) 0.357070, 0.066574, 0.057894, 0.518462;
+};
+
+probability ( AreaMeso_ALS | CombVerMo ) {
+    ( StrongUp ) 0.405962, 0.054970, 0.127132, 0.411936;
+    ( WeakUp ) 0.039803, 0.092401, 0.490840, 0.376957;
+    ( Neutral ) 0.215069, 0.596725, 0.154149, 0.034056;
+    ( Down ) 0.145650, 0.091237, 0.506795, 0.256317;
+};
+
+probability ( SatContMoist ) {
+    table 0.010098, 0.235601, 0.056806, 0.697495;
+};
+
+probability ( RaoContMoist ) {
+    table 0.085750, 0.039527, 0.388847, 0.485875;
+};
+
+probability ( CombMoisture | SatContMoist, RaoContMoist ) {
+    ( VeryWet, VeryWet ) 0.190214, 0.592069, 0.051586, 0.166131;
+    ( VeryWet, Wet ) 0.074219, 0.550573, 0.064805, 0.310403;
+    ( VeryWet, Neutral ) 0.745876, 0.165817, 0.076141, 0.012166;
+    ( VeryWet, Dry ) 0.478430, 0.210656, 0.131633, 0.179281;
+    ( Wet, VeryWet ) 0.152681, 0.386226, 0.413923, 0.047170;
+    ( Wet, Wet ) 0.307910, 0.257007, 0.121536, 0.313547;
+    ( Wet, Neutral ) 0.049957, 0.094419, 0.340603, 0.515021;
+    ( Wet, Dry ) 0.557462, 0.029071, 0.143886, 0.269581;
+    ( Neutral, VeryWet ) 0.218401, 0.523935, 0.228327, 0.029336;
+    ( Neutral, Wet ) 0.200300, 0.240875, 0.251792, 0.307033;
+    ( Neutral, Neutral ) 0.047741, 0.002280, 0.672806, 0.277173;
+    ( Neutral, Dry ) 0.775861, 0.153027, 0.036142, 0.034970;
+    ( Dry, VeryWet ) 0.196246, 0.235882, 0.338257, 0.229615;
+    ( Dry, Wet ) 0.081425, 0.080027, 0.161607, 0.676941;
+    ( Dry, Neutral ) 0.470863, 0.158877, 0.068178, 0.302083;
+    ( Dry, Dry ) 0.073762, 0.012337, 0.480579, 0.433323;
+};
+
+probability ( AreaMoDryAir | AreaMeso_ALS, CombMoisture ) {
+    ( StrongUp, VeryWet ) 0.368250, 0.367830, 0.045999, 0.217922;
+    ( StrongUp, Wet ) 0.109108, 0.055688, 0.424975, 0.410229;
+    ( StrongUp, Neutral ) 0.421660, 0.256524, 0.223490, 0.098326;
+    ( StrongUp, Dry ) 0.169827, 0.427934, 0.215130, 0.187109;
+    ( WeakUp, VeryWet ) 0.223914, 0.655849, 0.115351, 0.004886;
+    ( WeakUp, Wet ) 0.579337, 0.116099, 0.117046, 0.187518;
+    ( WeakUp, Neutral ) 0.267446, 0.209629, 0.478203, 0.044722;
+    ( WeakUp, Dry ) 0.086981, 0.271359, 0.138360, 0.503300;
+    ( Neutral, VeryWet ) 0.179859, 0.437366, 0.199963, 0.182812;
+    ( Neutral, Wet ) 0.096468, 0.164718, 0.154389, 0.584425;
+    ( Neutral, Neutral ) 0.048342, 0.203373, 0.376085, 0.372201;
+    ( Neutral, Dry ) 0.446459, 0.154546, 0.387224, 0.011770;
+    ( Down, VeryWet ) 0.626078, 0.011449, 0.304669, 0.057804;
+    ( Down, Wet ) 0.090698, 0.247374, 0.092581, 0.569347;
+    ( Down, Neutral ) 0.289474, 0.144751, 0.499743, 0.066033;
+    ( Down, Dry ) 0.383417, 0.323672, 0.217281, 0.075631;
+};
+
+probability ( VISCloudCov ) {
+    table 0.455620, 0.186867, 0.357512;
+};
+
+probability ( IRCloudCover ) {
+    table 0.315903, 0.073192, 0.610906;
+};
+
+probability ( CombClouds | VISCloudCov, IRCloudCover ) {
+    ( Cloudy, Cloudy ) 0.505805, 0.343054, 0.151141;
+    ( Cloudy, PC ) 0.619477, 0.265837, 0.114686;
+    ( Cloudy, Clear ) 0.058796, 0.520655, 0.420550;
+    ( PC, Cloudy ) 0.607131, 0.384571, 0.008298;
+    ( PC, PC ) 0.353797, 0.592067, 0.054135;
+    ( PC, Clear ) 0.434119, 0.555491, 0.010390;
+    ( Clear, Cloudy ) 0.163473, 0.387645, 0.448882;
+    ( Clear, PC ) 0.246033, 0.421266, 0.332701;
+    ( Clear, Clear ) 0.359542, 0.508658, 0.131801;
+};
+
+probability ( CldShadeOth | AreaMoDryAir, AreaMeso_ALS, CombClouds ) {
+    ( VeryWet, StrongUp, Cloudy ) 0.323061, 0.383525, 0.293414;
+    ( VeryWet, StrongUp, PC ) 0.674086, 0.059488, 0.266426;
+    ( VeryWet, StrongUp, Clear ) 0.302608, 0.440574, 0.256818;
+    ( VeryWet, WeakUp, Cloudy ) 0.572298, 0.081306, 0.346396;
+    ( VeryWet, WeakUp, PC ) 0.642708, 0.096591, 0.260701;
+    ( VeryWet, WeakUp, Clear ) 0.224242, 0.656240, 0.119518;
+    ( VeryWet, Neutral, Cloudy ) 0.235970, 0.378002, 0.386028;
+    ( VeryWet, Neutral, PC ) 0.252631, 0.254125, 0.493244;
+    ( VeryWet, Neutral, Clear ) 0.465410, 0.471506, 0.063084;
+    ( VeryWet, Down, Cloudy ) 0.781234, 0.106015, 0.112750;
+    ( VeryWet, Down, PC ) 0.733860, 0.068879, 0.197261;
+    ( VeryWet, Down, Clear ) 0.244535, 0.477106, 0.278359;
+    ( Wet, StrongUp, Cloudy ) 0.027532, 0.838398, 0.134070;
+    ( Wet, StrongUp, PC ) 0.068946, 0.520108, 0.410945;
+    ( Wet, StrongUp, Clear ) 0.210748, 0.563285, 0.225967;
+    ( Wet, WeakUp, Cloudy ) 0.693289, 0.261205, 0.045506;
+    ( Wet, WeakUp, PC ) 0.029450, 0.771384, 0.199165;
+    ( Wet, WeakUp, Clear ) 0.081931, 0.538450, 0.379618;
+    ( Wet, Neutral, Cloudy ) 0.176501, 0.661348, 0.162151;
+    ( Wet, Neutral, PC ) 0.296618, 0.562074, 0.141308;
+    ( Wet, Neutral, Clear ) 0.075042, 0.754531, 0.170427;
+    ( Wet, Down, Cloudy ) 0.512014, 0.461997, 0.025990;
+    ( Wet, Down, PC ) 0.255848, 0.499991, 0.244161;
+    ( Wet, Down, Clear ) 0.321846, 0.252514, 0.425641;
+    ( Neutral, StrongUp, Cloudy ) 0.636150, 0.288383, 0.075467;
+    ( Neutral, StrongUp, PC ) 0.203145, 0.187839, 0.609016;
+    ( Neutral, StrongUp, Clear ) 0.401736, 0.226855, 0.371409;
+    ( Neutral, WeakUp, Cloudy ) 0.645464, 0.069862, 0.284675;
+    ( Neutral, WeakUp, PC ) 0.104551, 0.376544, 0.518905;
+    ( Neutral, WeakUp, Clear ) 0.222151, 0.153572, 0.624277;
+    ( Neutral, Neutral, Cloudy ) 0.055445, 0.799983, 0.144573;
+    ( Neutral, Neutral, PC ) 0.232507, 0.694785, 0.072709;
+    ( Neutral, Neutral, Clear ) 0.525186, 0.320414, 0.154401;
+    ( Neutral, Down, Cloudy ) 0.512703, 0.445625, 0.041672;
+    ( Neutral, Down, PC ) 0.314827, 0.552886, 0.132287;
+    ( Neutral, Down, Clear ) 0.124240, 0.456459, 0.419301;
+    ( Dry, StrongUp, Cloudy ) 0.239305, 0.453048, 0.307647;
+    ( Dry, StrongUp, PC ) 0.117836, 0.072316, 0.809848;
+    ( Dry, StrongUp, Clear ) 0.017183, 0.013456, 0.969361;
+    ( Dry, WeakUp, Cloudy ) 0.230482, 0.596448, 0.173070;
+    ( Dry, WeakUp, PC ) 0.773212, 0.100776, 0.126012;
+    ( Dry, WeakUp, Clear ) 0.084151, 0.172198, 0.743651;
+    ( Dry, Neutral, Cloudy ) 0.063560, 0.195256, 0.741184;
+    ( Dry, Neutral, PC ) 0.124871, 0.375810, 0.499319;
+    ( Dry, Neutral, Clear ) 0.140002, 0.453155, 0.406843;
+    ( Dry, Down, Cloudy ) 0.599284, 0.109872, 0.290845;
+    ( Dry, Down, PC ) 0.556320, 0.211610, 0.232070;
+    ( Dry, Down, Clear ) 0.364637, 0.111513, 0.523851;
+};
+
+probability ( AMInstabMt ) {
+    table 0.910790, 0.057939, 0.031271;
+};
+
+probability ( InsInMt | CldShadeOth, AMInstabMt ) {
+    ( Cloudy, None ) 0.707724, 0.211262, 0.081014;
+    ( Cloudy, Weak ) 0.022938, 0.126208, 0.850854;
+    ( Cloudy, Strong ) 0.334745, 0.159645, 0.505610;
+    ( PC, None ) 0.764869, 0.153228, 0.081904;
+    ( PC, Weak ) 0.022114, 0.545562, 0.432324;
+    ( PC, Strong ) 0.177585, 0.282690, 0.539724;
+    ( Clear, None ) 0.732544, 0.107477, 0.159979;
+    ( Clear, Weak ) 0.471928, 0.321096, 0.206976;
+    ( Clear, Strong ) 0.504959, 0.078394, 0.416647;
+};
+
+probability ( WndHodograph ) {
+    table 0.163404, 0.048723, 0.538559, 0.249314;
+};
+
+probability ( OutflowFrMt | InsInMt, WndHodograph ) {
+    ( None, DCVZFavor ) 0.227347, 0.134131, 0.638522;
+    ( None, StrongWest ) 0.524462, 0.305091, 0.170448;
+    ( None, Westerly ) 0.206555, 0.228176, 0.565269;
+    ( None, Other ) 0.194296, 0.784993, 0.020711;
+    ( Weak, DCVZFavor ) 0.662092, 0.116469, 0.221439;
+    ( Weak, StrongWest ) 0.211769, 0.196999, 0.591232;
+    ( Weak, Westerly ) 0.741697, 0.068690, 0.189613;
+    ( Weak, Other ) 0.326221, 0.395598, 0.278180;
+    ( Strong, DCVZFavor ) 0.124932, 0.019902, 0.855166;
+    ( Strong, StrongWest ) 0.116354, 0.663806, 0.219840;
+    ( Strong, Westerly ) 0.431614, 0.159063, 0.409322;
+    ( Strong, Other ) 0.487463, 0.196483, 0.316054;
+};
+
+probability ( MorningBound ) {
+    table 0.099346, 0.425573, 0.475081;
+};
+
+probability ( Boundaries | OutflowFrMt, WndHodograph, MorningBound ) {
+    ( None, DCVZFavor, None ) 0.845684, 0.086290, 0.068026;
+    ( None, DCVZFavor, Weak ) 0.027619, 0.186052, 0.786329;
+    ( None, DCVZFavor, Strong ) 0.174817, 0.435285, 0.389898;
+    ( None, StrongWest, None ) 0.086781, 0.877541, 0.035677;
+    ( None, StrongWest, Weak ) 0.133111, 0.382556, 0.484333;
+    ( None, StrongWest, Strong ) 0.045109, 0.021328, 0.933563;
+    ( None, Westerly, None ) 0.357994, 0.160565, 0.481441;
+    ( None, Westerly, Weak ) 0.298967, 0.377739, 0.323294;
+    ( None, Westerly, Strong ) 0.173803, 0.544366, 0.281831;
+    ( None, Other, None ) 0.132642, 0.480130, 0.387228;
+    ( None, Other, Weak ) 0.024427, 0.227640, 0.747933;
+    ( None, Other, Strong ) 0.416087, 0.501380, 0.082533;
+    ( Weak, DCVZFavor, None ) 0.318584, 0.127060, 0.554356;
+    ( Weak, DCVZFavor, Weak ) 0.056628, 0.629594, 0.313777;
+    ( Weak, DCVZFavor, Strong ) 0.250099, 0.240193, 0.509708;
+    ( Weak, StrongWest, None ) 0.257043, 0.196595, 0.546362;
+    ( Weak, StrongWest, Weak ) 0.607184, 0.323213, 0.069604;
+    ( Weak, StrongWest, Strong ) 0.276918, 0.554367, 0.168714;
+    ( Weak, Westerly, None ) 0.444664, 0.496584, 0.058752;
+    ( Weak, Westerly, Weak ) 0.396434, 0.256945, 0.346620;
+    ( Weak, Westerly, Strong ) 0.087132, 0.807556, 0.105312;
+    ( Weak, Other, None ) 0.304380, 0.531979, 0.163641;
+    ( Weak, Other, Weak ) 0.378316, 0.114891, 0.506792;
+    ( Weak, Other, Strong ) 0.066657, 0.491083, 0.442261;
+    ( Strong, DCVZFavor, None ) 0.375620, 0.539971, 0.084410;
+    ( Strong, DCVZFavor, Weak ) 0.523146, 0.190321, 0.286533;
+    ( Strong, DCVZFavor, Strong ) 0.203974, 0.781972, 0.014053;
+    ( Strong, StrongWest, None ) 0.297866, 0.526140, 0.175994;
+    ( Strong, StrongWest, Weak ) 0.504252, 0.375317, 0.120431;
+    ( Strong, StrongWest, Strong ) 0.524622, 0.321630, 0.153748;
+    ( Strong, Westerly, None ) 0.107450, 0.212349, 0.680201;
+    ( Strong, Westerly, Weak ) 0.044235, 0.851000, 0.104764;
+    ( Strong, Westerly, Strong ) 0.215828, 0.388939, 0.395233;
+    ( Strong, Other, None ) 0.102976, 0.650863, 0.246161;
+    ( Strong, Other, Weak ) 0.171429, 0.714948, 0.113623;
+    ( Strong, Other, Strong ) 0.334300, 0.190109, 0.475590;
+};
+
+probability ( CldShadeConv | InsInMt, WndHodograph ) {
+    ( None, DCVZFavor ) 0.117111, 0.278981, 0.603909;
+    ( None, StrongWest ) 0.124981, 0.347142, 0.527878;
+    ( None, Westerly ) 0.292228, 0.103739, 0.604033;
+    ( None, Other ) 0.506552, 0.413878, 0.079569;
+    ( Weak, DCVZFavor ) 0.245668, 0.483930, 0.270402;
+    ( Weak, StrongWest ) 0.320334, 0.117195, 0.562471;
+    ( Weak, Westerly ) 0.069023, 0.352706, 0.578271;
+    ( Weak, Other ) 0.546421, 0.280527, 0.173052;
+    ( Strong, DCVZFavor ) 0.632641, 0.346478, 0.020881;
+    ( Strong, StrongWest ) 0.083941, 0.152084, 0.763975;
+    ( Strong, Westerly ) 0.410727, 0.068697, 0.520576;
+    ( Strong, Other ) 0.193458, 0.079477, 0.727064;
+};
+
+probability ( CompPlFcst | Boundaries, CldShadeConv, AreaMeso_ALS, CldShadeOth ) {
+    ( None, None, StrongUp, Cloudy ) 0.095847, 0.078101, 0.826052;
+    ( None, None, StrongUp, PC ) 0.035056, 0.072340, 0.892604;
+    ( None, None, StrongUp, Clear ) 0.052296, 0.547958, 0.399747;
+    ( None, None, WeakUp, Cloudy ) 0.799299, 0.133058, 0.067644;
+    ( None, None, WeakUp, PC ) 0.243814, 0.692770, 0.063416;
+    ( None, None, WeakUp, Clear ) 0.091646, 0.763007, 0.145347;
+    ( None, None, Neutral, Cloudy ) 0.065243, 0.254180, 0.680577;
+    ( None, None, Neutral, PC ) 0.297313, 0.385943, 0.316744;
+    ( None, None, Neutral, Clear ) 0.202182, 0.154488, 0.643330;
+    ( None, None, Down, Cloudy ) 0.206113, 0.158296, 0.635591;
+    ( None, None, Down, PC ) 0.044153, 0.882306, 0.073541;
+    ( None, None, Down, Clear ) 0.520122, 0.151508, 0.328370;
+    ( None, Some, StrongUp, Cloudy ) 0.308700, 0.416675, 0.274624;
+    ( None, Some, StrongUp, PC ) 0.159275, 0.344509, 0.496216;
+    ( None, Some, StrongUp, Clear ) 0.485629, 0.293839, 0.220533;
+    ( None, Some, WeakUp, Cloudy ) 0.460329, 0.433822, 0.105849;
+    ( None, Some, WeakUp, PC ) 0.113159, 0.327346, 0.559496;
+    ( None, Some, WeakUp, Clear ) 0.635667, 0.053680, 0.310653;
+    ( None, Some, Neutral, Cloudy ) 0.737582, 0.227540, 0.034878;
+    ( None, Some, Neutral, PC ) 0.743392, 0.206181, 0.050427;
+    ( None, Some, Neutral, Clear ) 0.097417, 0.690373, 0.212210;
+    ( None, Some, Down, Cloudy ) 0.473712, 0.216666, 0.309623;
+    ( None, Some, Down, PC ) 0.353339, 0.203629, 0.443032;
+    ( None, Some, Down, Clear ) 0.135426, 0.549815, 0.314758;
+    ( None, Marked, StrongUp, Cloudy ) 0.537498, 0.348816, 0.113685;
+    ( None, Marked, StrongUp, PC ) 0.354558, 0.483513, 0.161930;
+    ( None, Marked, StrongUp, Clear ) 0.359426, 0.455598, 0.184976;
+    ( None, Marked, WeakUp, Cloudy ) 0.731340, 0.066672, 0.201988;
+    ( None, Marked, WeakUp, PC ) 0.143572, 0.178515, 0.677913;
+    ( None, Marked, WeakUp, Clear ) 0.455538, 0.134414, 0.410048;
+    ( None, Marked, Neutral, Cloudy ) 0.284525, 0.318918, 0.396557;
+    ( None, Marked, Neutral, PC ) 0.249868, 0.682961, 0.067170;
+    ( None, Marked, Neutral, Clear ) 0.533732, 0.302915, 0.163353;
+    ( None, Marked, Down, Cloudy ) 0.096025, 0.847500, 0.056475;
+    ( None, Marked, Down, PC ) 0.453972, 0.137487, 0.408541;
+    ( None, Marked, Down, Clear ) 0.255517, 0.715852, 0.028630;
+    ( Weak, None, StrongUp, Cloudy ) 0.291140, 0.436194, 0.272666;
+    ( Weak, None, StrongUp, PC ) 0.250949, 0.087170, 0.661880;
+    ( Weak, None, StrongUp, Clear ) 0.631578, 0.223046, 0.145376;
+    ( Weak, None, WeakUp, Cloudy ) 0.428248, 0.221649, 0.350104;
+    ( Weak, None, WeakUp, PC ) 0.343057, 0.540405, 0.116539;
+    ( Weak, None, WeakUp, Clear ) 0.666836, 0.222724, 0.110440;
+    ( Weak, None, Neutral, Cloudy ) 0.412850, 0.555573, 0.031577;
+    ( Weak, None, Neutral, PC ) 0.474186, 0.374072, 0.151743;
+    ( Weak, None, Neutral, Clear ) 0.381416, 0.289308, 0.329276;
+    ( Weak, None, Down, Cloudy ) 0.201229, 0.585865, 0.212907;
+    ( Weak, None, Down, PC ) 0.389921, 0.044027, 0.566052;
+    ( Weak, None, Down, Clear ) 0.136191, 0.129995, 0.733814;
+    ( Weak, Some, StrongUp, Cloudy ) 0.443601, 0.265955, 0.290444;
+    ( Weak, Some, StrongUp, PC ) 0.525818, 0.140761, 0.333421;
+    ( Weak, Some, StrongUp, Clear ) 0.497794, 0.454859, 0.047347;
+    ( Weak, Some, WeakUp, Cloudy ) 0.131272, 0.515936, 0.352793;
+    ( Weak, Some, WeakUp, PC ) 0.061020, 0.883505, 0.055475;
+    ( Weak, Some, WeakUp, Clear ) 0.202045, 0.735346, 0.062610;
+    ( Weak, Some, Neutral, Cloudy ) 0.083270, 0.634968, 0.281762;
+    ( Weak, Some, Neutral, PC ) 0.033068, 0.785418, 0.181513;
+    ( Weak, Some, Neutral, Clear ) 0.363433, 0.216251, 0.420316;
+    ( Weak, Some, Down, Cloudy ) 0.135004, 0.134389, 0.730606;
+    ( Weak, Some, Down, PC ) 0.283352, 0.078592, 0.638056;
+    ( Weak, Some, Down, Clear ) 0.568697, 0.343859, 0.087444;
+    ( Weak, Marked, StrongUp, Cloudy ) 0.694130, 0.111534, 0.194336;
+    ( Weak, Marked, StrongUp, PC ) 0.871267, 0.091326, 0.037408;
+    ( Weak, Marked, StrongUp, Clear ) 0.114202, 0.300184, 0.585614;
+    ( Weak, Marked, WeakUp, Cloudy ) 0.391100, 0.089023, 0.519877;
+    ( Weak, Marked, WeakUp, PC ) 0.470344, 0.500561, 0.029095;
+    ( Weak, Marked, WeakUp, Clear ) 0.036212, 0.863448, 0.100339;
+    ( Weak, Marked, Neutral, Cloudy ) 0.152965, 0.149257, 0.697778;
+    ( Weak, Marked, Neutral, PC ) 0.410070, 0.339722, 0.250207;
+    ( Weak, Marked, Neutral, Clear ) 0.736243, 0.083225, 0.180532;
+    ( Weak, Marked, Down, Cloudy ) 0.653875, 0.121743, 0.224383;
+    ( Weak, Marked, Down, PC ) 0.021560, 0.855262, 0.123177;
+    ( Weak, Marked, Down, Clear ) 0.233983, 0.728689, 0.037328;
+    ( Strong, None, StrongUp, Cloudy ) 0.283786, 0.071159, 0.645055;
+    ( Strong, None, StrongUp, PC ) 0.250742, 0.475726, 0.273532;
+    ( Strong, None, StrongUp, Clear ) 0.444768, 0.482838, 0.072393;
+    ( Strong, None, WeakUp, Cloudy ) 0.118110, 0.464421, 0.417469;
+    ( Strong, None, WeakUp, PC ) 0.792240, 0.093082, 0.114678;
+    ( Strong, None, WeakUp, Clear ) 0.224682, 0.111649, 0.663669;
+    ( Strong, None, Neutral, Cloudy ) 0.196672, 0.710028, 0.093300;
+    ( Strong, None, Neutral, PC ) 0.506046, 0.087408, 0.406547;
+    ( Strong, None, Neutral, Clear ) 0.406856, 0.250435, 0.342708;
+    ( Strong, None, Down, Cloudy ) 0.317874, 0.451357, 0.230769;
+    ( Strong, None, Down, PC ) 0.212675, 0.605328, 0.181997;
+    ( Strong, None, Down, Clear ) 0.768514, 0.124138, 0.107348;
+    ( Strong, Some, StrongUp, Cloudy ) 0.534592, 0.310864, 0.154544;
+    ( Strong, Some, StrongUp, PC ) 0.663488, 0.165914, 0.170597;
+    ( Strong, Some, StrongUp, Clear ) 0.102700, 0.058584, 0.838716;
+    ( Strong, Some, WeakUp, Cloudy ) 0.478942, 0.288454, 0.232604;
+    ( Strong, Some, WeakUp, PC ) 0.044694, 0.548918, 0.406387;
+    ( Strong, Some, WeakUp, Clear ) 0.026399, 0.690186, 0.283415;
+    ( Strong, Some, Neutral, Cloudy ) 0.098076, 0.871582, 0.030342;
+    ( Strong, Some, Neutral, PC ) 0.703868, 0.132707, 0.163425;
+    ( Strong, Some, Neutral, Clear ) 0.422395, 0.369617, 0.207988;
+    ( Strong, Some, Down, Cloudy ) 0.282112, 0.656799, 0.061090;
+    ( Strong, Some, Down, PC ) 0.214248, 0.351581, 0.434171;
+    ( Strong, Some, Down, Clear ) 0.752201, 0.135659, 0.112141;
+    ( Strong, Marked, StrongUp, Cloudy ) 0.143674, 0.766809, 0.089517;
+    ( Strong, Marked, StrongUp, PC ) 0.842110, 0.149396, 0.008494;
+    ( Strong, Marked, StrongUp, Clear ) 0.448215, 0.350565, 0.201220;
+    ( Strong, Marked, WeakUp, Cloudy ) 0.223063, 0.192193, 0.584744;
+    ( Strong, Marked, WeakUp, PC ) 0.411473, 0.094898, 0.493629;
+    ( Strong, Marked, WeakUp, Clear ) 0.809346, 0.086162, 0.104492;
+    ( Strong, Marked, Neutral, Cloudy ) 0.068462, 0.656364, 0.275174;
+    ( Strong, Marked, Neutral, PC ) 0.299621, 0.176368, 0.524011;
+    ( Strong, Marked, Neutral, Clear ) 0.099316, 0.779764, 0.120920;
+    ( Strong, Marked, Down, Cloudy ) 0.091426, 0.384870, 0.523704;
+    ( Strong, Marked, Down, PC ) 0.614422, 0.333637, 0.051941;
+    ( Strong, Marked, Down, Clear ) 0.331973, 0.567662, 0.100365;
+};
+
+probability ( CapChange | CompPlFcst ) {
+    ( IncCapDecIns ) 0.562262, 0.122912, 0.314826;
+    ( LittleChange ) 0.020093, 0.829790, 0.150117;
+    ( DecCapIncIns ) 0.113718, 0.712156, 0.174126;
+};
+
+probability ( LoLevMoistAd ) {
+    table 0.160387, 0.019039, 0.306005, 0.514569;
+};
+
+probability ( InsChange | LoLevMoistAd, CompPlFcst ) {
+    ( StrongPos, IncCapDecIns ) 0.349447, 0.620281, 0.030272;
+    ( StrongPos, LittleChange ) 0.838427, 0.049638, 0.111935;
+    ( StrongPos, DecCapIncIns ) 0.111996, 0.273331, 0.614673;
+    ( WeakPos, IncCapDecIns ) 0.461627, 0.052941, 0.485432;
+    ( WeakPos, LittleChange ) 0.492514, 0.190252, 0.317234;
+    ( WeakPos, DecCapIncIns ) 0.468387, 0.338056, 0.193557;
+    ( Neutral, IncCapDecIns ) 0.489634, 0.361606, 0.148760;
+    ( Neutral, LittleChange ) 0.117195, 0.401569, 0.481236;
+    ( Neutral, DecCapIncIns ) 0.176787, 0.478417, 0.344797;
+    ( Negative, IncCapDecIns ) 0.937118, 0.020200, 0.042682;
+    ( Negative, LittleChange ) 0.141494, 0.618885, 0.239621;
+    ( Negative, DecCapIncIns ) 0.104992, 0.370495, 0.524513;
+};
+
+probability ( MountainFcst | InsInMt ) {
+    ( None ) 0.355861, 0.582521, 0.061618;
+    ( Weak ) 0.099337, 0.024373, 0.876290;
+    ( Strong ) 0.247883, 0.643662, 0.108455;
+};
+
+probability ( Date ) {
+    table 0.070955, 0.342367, 0.219942, 0.095481, 0.223402, 0.047854;
+};
+
+probability ( Scenario | Date ) {
+    ( May15_Jun14 ) 0.068502, 0.002148, 0.071962, 0.170198, 0.042190, 0.231376, 0.042694, 0.242252, 0.047870, 0.036389, 0.044420;
+    ( Jun15_Jul1 ) 0.141474, 0.074159, 0.000576, 0.198098, 0.046879, 0.028160, 0.087961, 0.089255, 0.027863, 0.190358, 0.115217;
+    ( Jul2_Jul15 ) 0.043780, 0.099073, 0.069673, 0.204743, 0.066551, 0.348349, 0.001221, 0.055492, 0.050474, 0.059120, 0.001525;
+    ( Jul16_Aug10 ) 0.098769, 0.041603, 0.080864, 0.034690, 0.095919, 0.018309, 0.066523, 0.141695, 0.072781, 0.249978, 0.098871;
+    ( Aug11_Aug20 ) 0.094555, 0.200513, 0.029375, 0.043288, 0.008478, 0.092986, 0.049159, 0.001636, 0.403396, 0.011630, 0.064985;
+    ( Aug20_Sep15 ) 0.089855, 0.042132, 0.101632, 0.094059, 0.126894, 0.033945, 0.286747, 0.106829, 0.033945, 0.012878, 0.071085;
+};
+
+probability ( ScenRelAMCIN | Scenario ) {
+    ( A ) 0.109692, 0.890308;
+    ( B ) 0.415139, 0.584861;
+    ( C ) 0.848565, 0.151435;
+    ( D ) 0.053626, 0.946374;
+    ( E ) 0.540813, 0.459187;
+    ( F ) 0.608563, 0.391437;
+    ( G ) 0.087242, 0.912758;
+    ( H ) 0.903536, 0.096464;
+    ( I ) 0.522966, 0.477034;
+    ( J ) 0.662792, 0.337208;
+    ( K ) 0.252386, 0.747614;
+};
+
+probability ( MorningCIN ) {
+    table 0.000024, 0.054948, 0.619520, 0.325508;
+};
+
+probability ( AMCINInScen | ScenRelAMCIN, MorningCIN ) {
+    ( AB, None ) 0.333630, 0.333390, 0.332980;
+    ( AB, PartInhibit ) 0.073186, 0.699759, 0.227055;
+    ( AB, Stifling ) 0.516983, 0.262961, 0.220056;
+    ( AB, TotalInhibit ) 0.437454, 0.542260, 0.020286;
+    ( CThruK, None ) 0.333128, 0.333367, 0.333504;
+    ( CThruK, PartInhibit ) 0.555712, 0.045230, 0.399058;
+    ( CThruK, Stifling ) 0.219287, 0.419988, 0.360725;
+    ( CThruK, TotalInhibit ) 0.547483, 0.107745, 0.344771;
+};
+
+probability ( CapInScen | AMCINInScen, CapChange ) {
+    ( LessThanAve, Decreasing ) 0.178283, 0.131126, 0.690590;
+    ( LessThanAve, LittleChange ) 0.339873, 0.236836, 0.423291;
+    ( LessThanAve, Increasing ) 0.044872, 0.744614, 0.210514;
+    ( Average, Decreasing ) 0.463167, 0.152125, 0.384709;
+    ( Average, LittleChange ) 0.123796, 0.152424, 0.723780;
+    ( Average, Increasing ) 0.264325, 0.287474, 0.448201;
+    ( MoreThanAve, Decreasing ) 0.113734, 0.343783, 0.542483;
+    ( MoreThanAve, LittleChange ) 0.348417, 0.602042, 0.049541;
+    ( MoreThanAve, Increasing ) 0.182940, 0.207274, 0.609786;
+};
+
+probability ( ScenRelAMIns | Scenario ) {
+    ( A ) 0.187364, 0.280380, 0.220504, 0.124822, 0.177030, 0.009900;
+    ( B ) 0.271622, 0.085811, 0.206772, 0.250978, 0.117551, 0.067266;
+    ( C ) 0.135235, 0.084952, 0.057959, 0.229449, 0.481606, 0.010799;
+    ( D ) 0.178962, 0.082801, 0.273321, 0.086143, 0.272625, 0.106149;
+    ( E ) 0.086398, 0.526338, 0.009322, 0.225766, 0.098191, 0.053985;
+    ( F ) 0.006470, 0.003043, 0.177958, 0.262976, 0.002541, 0.547012;
+    ( G ) 0.072642, 0.289223, 0.225072, 0.014269, 0.326124, 0.072670;
+    ( H ) 0.491657, 0.185222, 0.140241, 0.025980, 0.113663, 0.043237;
+    ( I ) 0.037004, 0.703697, 0.005966, 0.010811, 0.227189, 0.015333;
+    ( J ) 0.236002, 0.319950, 0.339572, 0.035712, 0.049118, 0.019645;
+    ( K ) 0.003364, 0.466758, 0.081350, 0.091004, 0.035140, 0.322385;
+};
+
+probability ( LIfr12ZDENSd ) {
+    table 0.057056, 0.573508, 0.189556, 0.179880;
+};
+
+probability ( AMDewptCalPl ) {
+    table 0.251936, 0.534931, 0.213133;
+};
+
+probability ( AMInsWliScen | ScenRelAMIns, LIfr12ZDENSd, AMDewptCalPl ) {
+    ( ABI, LIGt0, Instability ) 0.130384, 0.387391, 0.482225;
+    ( ABI, LIGt0, Neutral ) 0.225946, 0.335773, 0.438281;
+    ( ABI, LIGt0, Stability ) 0.305462, 0.402572, 0.291966;
+    ( ABI, N1GtLIGt_4, Instability ) 0.092322, 0.732027, 0.175650;
+    ( ABI, N1GtLIGt_4, Neutral ) 0.160354, 0.062469, 0.777176;
+    ( ABI, N1GtLIGt_4, Stability ) 0.449949, 0.362267, 0.187784;
+    ( ABI, N5GtLIGt_8, Instability ) 0.397071, 0.495433, 0.107496;
+    ( ABI, N5GtLIGt_8, Neutral ) 0.049397, 0.020960, 0.929642;
+    ( ABI, N5GtLIGt_8, Stability ) 0.293656, 0.084006, 0.622339;
+    ( ABI, LILt_8, Instability ) 0.133245, 0.702640, 0.164115;
+    ( ABI, LILt_8, Neutral ) 0.071488, 0.852555, 0.075958;
+    ( ABI, LILt_8, Stability ) 0.042148, 0.762292, 0.195560;
+    ( CDEJ, LIGt0, Instability ) 0.109403, 0.184419, 0.706178;
+    ( CDEJ, LIGt0, Neutral ) 0.392276, 0.363745, 0.243979;
+    ( CDEJ, LIGt0, Stability ) 0.448090, 0.380205, 0.171705;
+    ( CDEJ, N1GtLIGt_4, Instability ) 0.462721, 0.228209, 0.309070;
+    ( CDEJ, N1GtLIGt_4, Neutral ) 0.210684, 0.551610, 0.237706;
+    ( CDEJ, N1GtLIGt_4, Stability ) 0.084211, 0.873313, 0.042477;
+    ( CDEJ, N5GtLIGt_8, Instability ) 0.138819, 0.377071, 0.484110;
+    ( CDEJ, N5GtLIGt_8, Neutral ) 0.489411, 0.131426, 0.379164;
+    ( CDEJ, N5GtLIGt_8, Stability ) 0.478771, 0.049593, 0.471635;
+    ( CDEJ, LILt_8, Instability ) 0.409620, 0.425793, 0.164587;
+    ( CDEJ, LILt_8, Neutral ) 0.422901, 0.491556, 0.085543;
+    ( CDEJ, LILt_8, Stability ) 0.017488, 0.214461, 0.768051;
+    ( F, LIGt0, Instability ) 0.377746, 0.563431, 0.058823;
+    ( F, LIGt0, Neutral ) 0.145816, 0.789354, 0.064830;
+    ( F, LIGt0, Stability ) 0.843118, 0.072382, 0.084500;
+    ( F, N1GtLIGt_4, Instability ) 0.449055, 0.409293, 0.141652;
+    ( F, N1GtLIGt_4, Neutral ) 0.147169, 0.784140, 0.068691;
+    ( F, N1GtLIGt_4, Stability ) 0.356527, 0.329893, 0.313580;
+    ( F, N5GtLIGt_8, Instability ) 0.279700, 0.649830, 0.070470;
+    ( F, N5GtLIGt_8, Neutral ) 0.161971, 0.799126, 0.038903;
+    ( F, N5GtLIGt_8, Stability ) 0.132092, 0.441506, 0.426402;
+    ( F, LILt_8, Instability ) 0.138421, 0.381736, 0.479843;
+    ( F, LILt_8, Neutral ) 0.443571, 0.502675, 0.053754;
+    ( F, LILt_8, Stability ) 0.370314, 0.381091, 0.248595;
+    ( G, LIGt0, Instability ) 0.102172, 0.797613, 0.100216;
+    ( G, LIGt0, Neutral ) 0.176830, 0.593145, 0.230025;
+    ( G, LIGt0, Stability ) 0.106728, 0.776941, 0.116331;
+    ( G, N1GtLIGt_4, Instability ) 0.630523, 0.326859, 0.042618;
+    ( G, N1GtLIGt_4, Neutral ) 0.734434, 0.056147, 0.209419;
+    ( G, N1GtLIGt_4, Stability ) 0.149970, 0.281720, 0.568309;
+    ( G, N5GtLIGt_8, Instability ) 0.019848, 0.158737, 0.821415;
+    ( G, N5GtLIGt_8, Neutral ) 0.589649, 0.183723, 0.226627;
+    ( G, N5GtLIGt_8, Stability ) 0.235753, 0.074367, 0.689879;
+    ( G, LILt_8, Instability ) 0.072186, 0.812414, 0.115400;
+    ( G, LILt_8, Neutral ) 0.564966, 0.189060, 0.245974;
+    ( G, LILt_8, Stability ) 0.409211, 0.425072, 0.165716;
+    ( H, LIGt0, Instability ) 0.201855, 0.409099, 0.389045;
+    ( H, LIGt0, Neutral ) 0.262463, 0.173997, 0.563540;
+    ( H, LIGt0, Stability ) 0.105290, 0.179340, 0.715369;
+    ( H, N1GtLIGt_4, Instability ) 0.597591, 0.111943, 0.290466;
+    ( H, N1GtLIGt_4, Neutral ) 0.411877, 0.436996, 0.151127;
+    ( H, N1GtLIGt_4, Stability ) 0.894884, 0.060228, 0.044889;
+    ( H, N5GtLIGt_8, Instability ) 0.276839, 0.328456, 0.394704;
+    ( H, N5GtLIGt_8, Neutral ) 0.379654, 0.254840, 0.365507;
+    ( H, N5GtLIGt_8, Stability ) 0.205805, 0.544285, 0.249910;
+    ( H, LILt_8, Instability ) 0.087321, 0.421874, 0.490806;
+    ( H, LILt_8, Neutral ) 0.107621, 0.041094, 0.851284;
+    ( H, LILt_8, Stability ) 0.717554, 0.167019, 0.115427;
+    ( K, LIGt0, Instability ) 0.266634, 0.445334, 0.288032;
+    ( K, LIGt0, Neutral ) 0.103462, 0.008760, 0.887778;
+    ( K, LIGt0, Stability ) 0.912436, 0.068839, 0.018725;
+    ( K, N1GtLIGt_4, Instability ) 0.440477, 0.526083, 0.033441;
+    ( K, N1GtLIGt_4, Neutral ) 0.070043, 0.680809, 0.249148;
+    ( K, N1GtLIGt_4, Stability ) 0.730186, 0.087755, 0.182059;
+    ( K, N5GtLIGt_8, Instability ) 0.026969, 0.758671, 0.214359;
+    ( K, N5GtLIGt_8, Neutral ) 0.863330, 0.046774, 0.089896;
+    ( K, N5GtLIGt_8, Stability ) 0.023339, 0.930369, 0.046291;
+    ( K, LILt_8, Instability ) 0.546725, 0.311362, 0.141914;
+    ( K, LILt_8, Neutral ) 0.284086, 0.233239, 0.482675;
+    ( K, LILt_8, Stability ) 0.395150, 0.182368, 0.422482;
+};
+
+probability ( InsSclInScen | AMInsWliScen, InsChange ) {
+    ( LessUnstable, Decreasing ) 0.202450, 0.365528, 0.432022;
+    ( LessUnstable, LittleChange ) 0.069621, 0.178646, 0.751732;
+    ( LessUnstable, Increasing ) 0.275403, 0.006889, 0.717709;
+    ( Average, Decreasing ) 0.111565, 0.654950, 0.233485;
+    ( Average, LittleChange ) 0.580327, 0.364302, 0.055371;
+    ( Average, Increasing ) 0.012628, 0.696133, 0.291239;
+    ( MoreUnstable, Decreasing ) 0.305905, 0.211687, 0.482408;
+    ( MoreUnstable, LittleChange ) 0.659621, 0.179019, 0.161361;
+    ( MoreUnstable, Increasing ) 0.381936, 0.552763, 0.065301;
+};
+
+probability ( ScenRel3_4 | Scenario ) {
+    ( A ) 0.184894, 0.184011, 0.332605, 0.200355, 0.098136;
+    ( B ) 0.468035, 0.134993, 0.191330, 0.101361, 0.104280;
+    ( C ) 0.219619, 0.184151, 0.274330, 0.100031, 0.221870;
+    ( D ) 0.071773, 0.151383, 0.081780, 0.483112, 0.211951;
+    ( E ) 0.164515, 0.322588, 0.160328, 0.177670, 0.174900;
+    ( F ) 0.313181, 0.217767, 0.028889, 0.226809, 0.213354;
+    ( G ) 0.783179, 0.010153, 0.044024, 0.044006, 0.118638;
+    ( H ) 0.383628, 0.010023, 0.018379, 0.209934, 0.378036;
+    ( I ) 0.027214, 0.001552, 0.363815, 0.028033, 0.579385;
+    ( J ) 0.250338, 0.279676, 0.013406, 0.398337, 0.058243;
+    ( K ) 0.145085, 0.372436, 0.049776, 0.114968, 0.317735;
+};
+
+probability ( LatestCIN ) {
+    table 0.238579, 0.347879, 0.402883, 0.010660;
+};
+
+probability ( LLIW ) {
+    table 0.532791, 0.226725, 0.137998, 0.102487;
+};
+
+probability ( CurPropConv | LatestCIN, LLIW ) {
+    ( None, Unfavorable ) 0.476320, 0.174325, 0.126593, 0.222763;
+    ( None, Weak ) 0.513186, 0.286241, 0.136058, 0.064515;
+    ( None, Moderate ) 0.178594, 0.262889, 0.034202, 0.524315;
+    ( None, Strong ) 0.189944, 0.341879, 0.157962, 0.310214;
+    ( PartInhibit, Unfavorable ) 0.328408, 0.124610, 0.285993, 0.260989;
+    ( PartInhibit, Weak ) 0.066594, 0.215395, 0.166311, 0.551700;
+    ( PartInhibit, Moderate ) 0.312790, 0.027717, 0.553999, 0.105495;
+    ( PartInhibit, Strong ) 0.374773, 0.056953, 0.109467, 0.458806;
+    ( Stifling, Unfavorable ) 0.415807, 0.247661, 0.066750, 0.269782;
+    ( Stifling, Weak ) 0.220538, 0.476545, 0.101976, 0.200941;
+    ( Stifling, Moderate ) 0.170272, 0.230463, 0.032691, 0.566574;
+    ( Stifling, Strong ) 0.081148, 0.143788, 0.395319, 0.379745;
+    ( TotalInhibit, Unfavorable ) 0.113719, 0.366547, 0.067751, 0.451982;
+    ( TotalInhibit, Weak ) 0.012063, 0.187402, 0.743702, 0.056833;
+    ( TotalInhibit, Moderate ) 0.130931, 0.186470, 0.552274, 0.130326;
+    ( TotalInhibit, Strong ) 0.637035, 0.196999, 0.051169, 0.114796;
+};
+
+probability ( ScnRelPlFcst | Scenario ) {
+    ( A ) 0.063190, 0.015941, 0.320474, 0.064712, 0.030550, 0.075831, 0.047882, 0.081537, 0.226435, 0.041096, 0.032352;
+    ( B ) 0.281084, 0.025140, 0.063104, 0.087563, 0.221776, 0.015412, 0.086670, 0.103685, 0.050083, 0.033040, 0.032442;
+    ( C ) 0.058260, 0.003915, 0.051930, 0.063332, 0.325585, 0.033847, 0.149324, 0.072534, 0.172290, 0.011986, 0.056998;
+    ( D ) 0.056143, 0.016829, 0.088645, 0.212365, 0.335214, 0.054934, 0.009952, 0.030532, 0.148545, 0.039670, 0.007171;
+    ( E ) 0.030082, 0.077426, 0.039892, 0.064038, 0.159974, 0.050902, 0.078000, 0.055730, 0.066506, 0.268227, 0.109222;
+    ( F ) 0.305759, 0.027948, 0.063799, 0.021807, 0.013284, 0.042707, 0.150960, 0.062303, 0.279695, 0.000773, 0.030967;
+    ( G ) 0.210107, 0.021690, 0.080808, 0.035316, 0.198110, 0.008631, 0.034696, 0.250352, 0.110685, 0.026615, 0.022992;
+    ( H ) 0.029519, 0.030839, 0.025399, 0.016877, 0.278338, 0.053211, 0.177209, 0.116818, 0.215003, 0.043168, 0.013620;
+    ( I ) 0.046494, 0.076816, 0.012655, 0.093273, 0.098657, 0.060595, 0.300150, 0.029032, 0.194384, 0.023307, 0.064638;
+    ( J ) 0.031415, 0.170162, 0.010977, 0.001137, 0.003441, 0.000656, 0.198899, 0.146869, 0.183571, 0.044413, 0.208459;
+    ( K ) 0.021558, 0.020102, 0.273542, 0.049610, 0.241390, 0.043824, 0.131016, 0.001376, 0.094298, 0.102050, 0.021233;
+};
+
+probability ( PlainsFcst | CurPropConv, InsSclInScen, CapInScen, ScnRelPlFcst ) {
+    ( None, LessUnstable, LessThanAve, A ) 0.547381, 0.258102, 0.194516;
+    ( None, LessUnstable, LessThanAve, B ) 0.755048, 0.019955, 0.224997;
+    ( None, LessUnstable, LessThanAve, C ) 0.203010, 0.116391, 0.680599;
+    ( None, LessUnstable, LessThanAve, D ) 0.781655, 0.185703, 0.032642;
+    ( None, LessUnstable, LessThanAve, E ) 0.420694, 0.450741, 0.128566;
+    ( None, LessUnstable, LessThanAve, F ) 0.042687, 0.030400, 0.926914;
+    ( None, LessUnstable, LessThanAve, G ) 0.053350, 0.376714, 0.569937;
+    ( None, LessUnstable, LessThanAve, H ) 0.453730, 0.089845, 0.456425;
+    ( None, LessUnstable, LessThanAve, I ) 0.046021, 0.285405, 0.668574;
+    ( None, LessUnstable, LessThanAve, J ) 0.047996, 0.234340, 0.717664;
+    ( None, LessUnstable, LessThanAve, K ) 0.168971, 0.567085, 0.263944;
+    ( None, LessUnstable, Average, A ) 0.196093, 0.497342, 0.306565;
+    ( None, LessUnstable, Average, B ) 0.249359, 0.663270, 0.087370;
+    ( None, LessUnstable, Average, C ) 0.049471, 0.756454, 0.194075;
+    ( None, LessUnstable, Average, D ) 0.508933, 0.154709, 0.336358;
+    ( None, LessUnstable, Average, E ) 0.568623, 0.220703, 0.210674;
+    ( None, LessUnstable, Average, F ) 0.149987, 0.714260, 0.135754;
+    ( None, LessUnstable, Average, G ) 0.195994, 0.019366, 0.784640;
+    ( None, LessUnstable, Average, H ) 0.115996, 0.243516, 0.640487;
+    ( None, LessUnstable, Average, I ) 0.078695, 0.419584, 0.501721;
+    ( None, LessUnstable, Average, J ) 0.333712, 0.526561, 0.139726;
+    ( None, LessUnstable, Average, K ) 0.394936, 0.294495, 0.310569;
+    ( None, LessUnstable, MoreThanAve, A ) 0.438825, 0.093654, 0.467522;
+    ( None, LessUnstable, MoreThanAve, B ) 0.235231, 0.608000, 0.156768;
+    ( None, LessUnstable, MoreThanAve, C ) 0.016796, 0.971235, 0.011968;
+    ( None, LessUnstable, MoreThanAve, D ) 0.302060, 0.204959, 0.492981;
+    ( None, LessUnstable, MoreThanAve, E ) 0.405541, 0.113909, 0.480550;
+    ( None, LessUnstable, MoreThanAve, F ) 0.069660, 0.534954, 0.395386;
+    ( None, LessUnstable, MoreThanAve, G ) 0.195963, 0.517935, 0.286102;
+    ( None, LessUnstable, MoreThanAve, H ) 0.040181, 0.348241, 0.611577;
+    ( None, LessUnstable, MoreThanAve, I ) 0.090550, 0.265746, 0.643704;
+    ( None, LessUnstable, MoreThanAve, J ) 0.013589, 0.260611, 0.725800;
+    ( None, LessUnstable, MoreThanAve, K ) 0.280057, 0.380973, 0.338969;
+    ( None, Average, LessThanAve, A ) 0.017561, 0.578032, 0.404407;
+    ( None, Average, LessThanAve, B ) 0.588930, 0.376866, 0.034204;
+    ( None, Average, LessThanAve, C ) 0.261466, 0.307914, 0.430620;
+    ( None, Average, LessThanAve, D ) 0.663418, 0.201416, 0.135166;
+    ( None, Average, LessThanAve, E ) 0.040386, 0.786803, 0.172810;
+    ( None, Average, LessThanAve, F ) 0.397634, 0.051190, 0.551175;
+    ( None, Average, LessThanAve, G ) 0.104331, 0.431278, 0.464391;
+    ( None, Average, LessThanAve, H ) 0.432438, 0.040481, 0.527080;
+    ( None, Average, LessThanAve, I ) 0.470229, 0.449110, 0.080661;
+    ( None, Average, LessThanAve, J ) 0.160032, 0.723351, 0.116617;
+    ( None, Average, LessThanAve, K ) 0.529117, 0.083875, 0.387008;
+    ( None, Average, Average, A ) 0.034323, 0.935457, 0.030219;
+    ( None, Average, Average, B ) 0.085921, 0.351498, 0.562581;
+    ( None, Average, Average, C ) 0.066286, 0.245475, 0.688239;
+    ( None, Average, Average, D ) 0.420815, 0.382104, 0.197081;
+    ( None, Average, Average, E ) 0.123502, 0.090813, 0.785685;
+    ( None, Average, Average, F ) 0.514315, 0.120075, 0.365610;
+    ( None, Average, Average, G ) 0.086133, 0.596306, 0.317561;
+    ( None, Average, Average, H ) 0.942765, 0.013553, 0.043682;
+    ( None, Average, Average, I ) 0.446439, 0.050817, 0.502744;
+    ( None, Average, Average, J ) 0.861642, 0.061394, 0.076964;
+    ( None, Average, Average, K ) 0.771345, 0.198377, 0.030278;
+    ( None, Average, MoreThanAve, A ) 0.479672, 0.073469, 0.446859;
+    ( None, Average, MoreThanAve, B ) 0.579917, 0.194077, 0.226006;
+    ( None, Average, MoreThanAve, C ) 0.416633, 0.403502, 0.179865;
+    ( None, Average, MoreThanAve, D ) 0.280520, 0.190675, 0.528805;
+    ( None, Average, MoreThanAve, E ) 0.496764, 0.097656, 0.405580;
+    ( None, Average, MoreThanAve, F ) 0.425421, 0.275107, 0.299472;
+    ( None, Average, MoreThanAve, G ) 0.055806, 0.205361, 0.738833;
+    ( None, Average, MoreThanAve, H ) 0.050105, 0.330453, 0.619443;
+    ( None, Average, MoreThanAve, I ) 0.124716, 0.467202, 0.408082;
+    ( None, Average, MoreThanAve, J ) 0.189684, 0.519083, 0.291233;
+    ( None, Average, MoreThanAve, K ) 0.092723, 0.330661, 0.576616;
+    ( None, MoreUnstable, LessThanAve, A ) 0.096345, 0.284433, 0.619222;
+    ( None, MoreUnstable, LessThanAve, B ) 0.465571, 0.396655, 0.137775;
+    ( None, MoreUnstable, LessThanAve, C ) 0.521178, 0.058059, 0.420763;
+    ( None, MoreUnstable, LessThanAve, D ) 0.207398, 0.766426, 0.026175;
+    ( None, MoreUnstable, LessThanAve, E ) 0.563627, 0.284819, 0.151554;
+    ( None, MoreUnstable, LessThanAve, F ) 0.148624, 0.395926, 0.455450;
+    ( None, MoreUnstable, LessThanAve, G ) 0.820164, 0.125172, 0.054665;
+    ( None, MoreUnstable, LessThanAve, H ) 0.456717, 0.191409, 0.351874;
+    ( None, MoreUnstable, LessThanAve, I ) 0.055046, 0.838204, 0.106751;
+    ( None, MoreUnstable, LessThanAve, J ) 0.809146, 0.043888, 0.146965;
+    ( None, MoreUnstable, LessThanAve, K ) 0.225963, 0.513207, 0.260830;
+    ( None, MoreUnstable, Average, A ) 0.525222, 0.336199, 0.138580;
+    ( None, MoreUnstable, Average, B ) 0.293006, 0.396951, 0.310044;
+    ( None, MoreUnstable, Average, C ) 0.613757, 0.293481, 0.092762;
+    ( None, MoreUnstable, Average, D ) 0.161046, 0.114166, 0.724787;
+    ( None, MoreUnstable, Average, E ) 0.103357, 0.655044, 0.241599;
+    ( None, MoreUnstable, Average, F ) 0.155894, 0.486134, 0.357971;
+    ( None, MoreUnstable, Average, G ) 0.264078, 0.035690, 0.700233;
+    ( None, MoreUnstable, Average, H ) 0.248978, 0.362761, 0.388261;
+    ( None, MoreUnstable, Average, I ) 0.189783, 0.263834, 0.546384;
+    ( None, MoreUnstable, Average, J ) 0.259874, 0.105920, 0.634207;
+    ( None, MoreUnstable, Average, K ) 0.442422, 0.509289, 0.048289;
+    ( None, MoreUnstable, MoreThanAve, A ) 0.737078, 0.079204, 0.183718;
+    ( None, MoreUnstable, MoreThanAve, B ) 0.645001, 0.158168, 0.196831;
+    ( None, MoreUnstable, MoreThanAve, C ) 0.269581, 0.238129, 0.492290;
+    ( None, MoreUnstable, MoreThanAve, D ) 0.722916, 0.199666, 0.077418;
+    ( None, MoreUnstable, MoreThanAve, E ) 0.695923, 0.118377, 0.185700;
+    ( None, MoreUnstable, MoreThanAve, F ) 0.283538, 0.035489, 0.680973;
+    ( None, MoreUnstable, MoreThanAve, G ) 0.497067, 0.456171, 0.046762;
+    ( None, MoreUnstable, MoreThanAve, H ) 0.741329, 0.208792, 0.049878;
+    ( None, MoreUnstable, MoreThanAve, I ) 0.706456, 0.108407, 0.185137;
+    ( None, MoreUnstable, MoreThanAve, J ) 0.284134, 0.419181, 0.296685;
+    ( None, MoreUnstable, MoreThanAve, K ) 0.786163, 0.030244, 0.183593;
+    ( Slight, LessUnstable, LessThanAve, A ) 0.125204, 0.839915, 0.034880;
+    ( Slight, LessUnstable, LessThanAve, B ) 0.161694, 0.302740, 0.535565;
+    ( Slight, LessUnstable, LessThanAve, C ) 0.031102, 0.335073, 0.633825;
+    ( Slight, LessUnstable, LessThanAve, D ) 0.122275, 0.766734, 0.110991;
+    ( Slight, LessUnstable, LessThanAve, E ) 0.401346, 0.329543, 0.269111;
+    ( Slight, LessUnstable, LessThanAve, F ) 0.415569, 0.092389, 0.492043;
+    ( Slight, LessUnstable, LessThanAve, G ) 0.026521, 0.111647, 0.861832;
+    ( Slight, LessUnstable, LessThanAve, H ) 0.139411, 0.349675, 0.510914;
+    ( Slight, LessUnstable, LessThanAve, I ) 0.039390, 0.877790, 0.082819;
+    ( Slight, LessUnstable, LessThanAve, J ) 0.613147, 0.037978, 0.348875;
+    ( Slight, LessUnstable, LessThanAve, K ) 0.076623, 0.835261, 0.088117;
+    ( Slight, LessUnstable, Average, A ) 0.129872, 0.218910, 0.651218;
+    ( Slight, LessUnstable, Average, B ) 0.474196, 0.034073, 0.491731;
+    ( Slight, LessUnstable, Average, C ) 0.235228, 0.245241, 0.519531;
+    ( Slight, LessUnstable, Average, D ) 0.066955, 0.063843, 0.869202;
+    ( Slight, LessUnstable, Average, E ) 0.134058, 0.513156, 0.352786;
+    ( Slight, LessUnstable, Average, F ) 0.688030, 0.082614, 0.229356;
+    ( Slight, LessUnstable, Average, G ) 0.289824, 0.345605, 0.364571;
+    ( Slight, LessUnstable, Average, H ) 0.229934, 0.269073, 0.500994;
+    ( Slight, LessUnstable, Average, I ) 0.312358, 0.102951, 0.584691;
+    ( Slight, LessUnstable, Average, J ) 0.126609, 0.227120, 0.646271;
+    ( Slight, LessUnstable, Average, K ) 0.529491, 0.023279, 0.447230;
+    ( Slight, LessUnstable, MoreThanAve, A ) 0.564158, 0.210280, 0.225562;
+    ( Slight, LessUnstable, MoreThanAve, B ) 0.018100, 0.507459, 0.474441;
+    ( Slight, LessUnstable, MoreThanAve, C ) 0.565608, 0.131444, 0.302948;
+    ( Slight, LessUnstable, MoreThanAve, D ) 0.614790, 0.068086, 0.317123;
+    ( Slight, LessUnstable, MoreThanAve, E ) 0.441117, 0.415405, 0.143478;
+    ( Slight, LessUnstable, MoreThanAve, F ) 0.378398, 0.317547, 0.304055;
+    ( Slight, LessUnstable, MoreThanAve, G ) 0.004958, 0.707752, 0.287290;
+    ( Slight, LessUnstable, MoreThanAve, H ) 0.107398, 0.575799, 0.316803;
+    ( Slight, LessUnstable, MoreThanAve, I ) 0.145884, 0.735184, 0.118933;
+    ( Slight, LessUnstable, MoreThanAve, J ) 0.872891, 0.023395, 0.103713;
+    ( Slight, LessUnstable, MoreThanAve, K ) 0.519544, 0.074793, 0.405663;
+    ( Slight, Average, LessThanAve, A ) 0.519230, 0.060801, 0.419969;
+    ( Slight, Average, LessThanAve, B ) 0.130168, 0.848506, 0.021327;
+    ( Slight, Average, LessThanAve, C ) 0.635752, 0.351925, 0.012322;
+    ( Slight, Average, LessThanAve, D ) 0.845104, 0.013455, 0.141442;
+    ( Slight, Average, LessThanAve, E ) 0.121809, 0.328831, 0.549360;
+    ( Slight, Average, LessThanAve, F ) 0.814949, 0.154057, 0.030994;
+    ( Slight, Average, LessThanAve, G ) 0.384379, 0.444975, 0.170646;
+    ( Slight, Average, LessThanAve, H ) 0.356784, 0.349354, 0.293861;
+    ( Slight, Average, LessThanAve, I ) 0.478310, 0.446331, 0.075360;
+    ( Slight, Average, LessThanAve, J ) 0.475961, 0.258554, 0.265485;
+    ( Slight, Average, LessThanAve, K ) 0.305390, 0.026806, 0.667804;
+    ( Slight, Average, Average, A ) 0.550605, 0.380213, 0.069183;
+    ( Slight, Average, Average, B ) 0.076848, 0.160229, 0.762923;
+    ( Slight, Average, Average, C ) 0.163853, 0.420159, 0.415988;
+    ( Slight, Average, Average, D ) 0.288556, 0.485826, 0.225618;
+    ( Slight, Average, Average, E ) 0.023167, 0.315537, 0.661297;
+    ( Slight, Average, Average, F ) 0.555236, 0.301488, 0.143276;
+    ( Slight, Average, Average, G ) 0.541342, 0.270512, 0.188146;
+    ( Slight, Average, Average, H ) 0.330302, 0.226450, 0.443247;
+    ( Slight, Average, Average, I ) 0.045536, 0.215723, 0.738740;
+    ( Slight, Average, Average, J ) 0.764641, 0.095053, 0.140306;
+    ( Slight, Average, Average, K ) 0.572444, 0.030564, 0.396992;
+    ( Slight, Average, MoreThanAve, A ) 0.020477, 0.845849, 0.133674;
+    ( Slight, Average, MoreThanAve, B ) 0.078581, 0.866556, 0.054863;
+    ( Slight, Average, MoreThanAve, C ) 0.393120, 0.464268, 0.142612;
+    ( Slight, Average, MoreThanAve, D ) 0.397150, 0.579516, 0.023334;
+    ( Slight, Average, MoreThanAve, E ) 0.404034, 0.461456, 0.134509;
+    ( Slight, Average, MoreThanAve, F ) 0.882937, 0.075052, 0.042011;
+    ( Slight, Average, MoreThanAve, G ) 0.220051, 0.166139, 0.613810;
+    ( Slight, Average, MoreThanAve, H ) 0.540515, 0.178874, 0.280611;
+    ( Slight, Average, MoreThanAve, I ) 0.284659, 0.184502, 0.530839;
+    ( Slight, Average, MoreThanAve, J ) 0.040921, 0.741020, 0.218059;
+    ( Slight, Average, MoreThanAve, K ) 0.071675, 0.669521, 0.258804;
+    ( Slight, MoreUnstable, LessThanAve, A ) 0.539270, 0.303949, 0.156781;
+    ( Slight, MoreUnstable, LessThanAve, B ) 0.613554, 0.356361, 0.030085;
+    ( Slight, MoreUnstable, LessThanAve, C ) 0.078725, 0.896001, 0.025275;
+    ( Slight, MoreUnstable, LessThanAve, D ) 0.035388, 0.615038, 0.349574;
+    ( Slight, MoreUnstable, LessThanAve, E ) 0.488858, 0.497972, 0.013170;
+    ( Slight, MoreUnstable, LessThanAve, F ) 0.525450, 0.253203, 0.221346;
+    ( Slight, MoreUnstable, LessThanAve, G ) 0.662386, 0.211220, 0.126394;
+    ( Slight, MoreUnstable, LessThanAve, H ) 0.031480, 0.423786, 0.544734;
+    ( Slight, MoreUnstable, LessThanAve, I ) 0.343620, 0.218427, 0.437953;
+    ( Slight, MoreUnstable, LessThanAve, J ) 0.459328, 0.118956, 0.421716;
+    ( Slight, MoreUnstable, LessThanAve, K ) 0.486827, 0.366215, 0.146959;
+    ( Slight, MoreUnstable, Average, A ) 0.188266, 0.502347, 0.309387;
+    ( Slight, MoreUnstable, Average, B ) 0.643559, 0.332143, 0.024298;
+    ( Slight, MoreUnstable, Average, C ) 0.067238, 0.796617, 0.136145;
+    ( Slight, MoreUnstable, Average, D ) 0.011712, 0.729864, 0.258424;
+    ( Slight, MoreUnstable, Average, E ) 0.622365, 0.280881, 0.096754;
+    ( Slight, MoreUnstable, Average, F ) 0.687648, 0.260820, 0.051532;
+    ( Slight, MoreUnstable, Average, G ) 0.467333, 0.083733, 0.448933;
+    ( Slight, MoreUnstable, Average, H ) 0.679996, 0.089259, 0.230745;
+    ( Slight, MoreUnstable, Average, I ) 0.351263, 0.066487, 0.582250;
+    ( Slight, MoreUnstable, Average, J ) 0.394068, 0.017371, 0.588561;
+    ( Slight, MoreUnstable, Average, K ) 0.352246, 0.623715, 0.024038;
+    ( Slight, MoreUnstable, MoreThanAve, A ) 0.606895, 0.111832, 0.281272;
+    ( Slight, MoreUnstable, MoreThanAve, B ) 0.073921, 0.031652, 0.894427;
+    ( Slight, MoreUnstable, MoreThanAve, C ) 0.307969, 0.544964, 0.147068;
+    ( Slight, MoreUnstable, MoreThanAve, D ) 0.326915, 0.413689, 0.259396;
+    ( Slight, MoreUnstable, MoreThanAve, E ) 0.249526, 0.415312, 0.335162;
+    ( Slight, MoreUnstable, MoreThanAve, F ) 0.068842, 0.685606, 0.245552;
+    ( Slight, MoreUnstable, MoreThanAve, G ) 0.252296, 0.554752, 0.192952;
+    ( Slight, MoreUnstable, MoreThanAve, H ) 0.224873, 0.112355, 0.662772;
+    ( Slight, MoreUnstable, MoreThanAve, I ) 0.627873, 0.124338, 0.247790;
+    ( Slight, MoreUnstable, MoreThanAve, J ) 0.708249, 0.122396, 0.169355;
+    ( Slight, MoreUnstable, MoreThanAve, K ) 0.551159, 0.074356, 0.374485;
+    ( Moderate, LessUnstable, LessThanAve, A ) 0.423637, 0.040814, 0.535548;
+    ( Moderate, LessUnstable, LessThanAve, B ) 0.486816, 0.350280, 0.162904;
+    ( Moderate, LessUnstable, LessThanAve, C ) 0.811074, 0.156935, 0.031991;
+    ( Moderate, LessUnstable, LessThanAve, D ) 0.358790, 0.262088, 0.379123;
+    ( Moderate, LessUnstable, LessThanAve, E ) 0.551031, 0.201565, 0.247404;
+    ( Moderate, LessUnstable, LessThanAve, F ) 0.425113, 0.528527, 0.046360;
+    ( Moderate, LessUnstable, LessThanAve, G ) 0.011353, 0.066314, 0.922333;
+    ( Moderate, LessUnstable, LessThanAve, H ) 0.177302, 0.772441, 0.050257;
+    ( Moderate, LessUnstable, LessThanAve, I ) 0.302712, 0.580727, 0.116561;
+    ( Moderate, LessUnstable, LessThanAve, J ) 0.551118, 0.380670, 0.068211;
+    ( Moderate, LessUnstable, LessThanAve, K ) 0.297180, 0.670051, 0.032770;
+    ( Moderate, LessUnstable, Average, A ) 0.680536, 0.160244, 0.159220;
+    ( Moderate, LessUnstable, Average, B ) 0.033174, 0.892645, 0.074181;
+    ( Moderate, LessUnstable, Average, C ) 0.191900, 0.559501, 0.248598;
+    ( Moderate, LessUnstable, Average, D ) 0.274289, 0.536274, 0.189437;
+    ( Moderate, LessUnstable, Average, E ) 0.010577, 0.904422, 0.085001;
+    ( Moderate, LessUnstable, Average, F ) 0.316877, 0.048670, 0.634454;
+    ( Moderate, LessUnstable, Average, G ) 0.096957, 0.626685, 0.276358;
+    ( Moderate, LessUnstable, Average, H ) 0.227780, 0.748492, 0.023727;
+    ( Moderate, LessUnstable, Average, I ) 0.020554, 0.924594, 0.054853;
+    ( Moderate, LessUnstable, Average, J ) 0.749913, 0.222105, 0.027982;
+    ( Moderate, LessUnstable, Average, K ) 0.603263, 0.180300, 0.216438;
+    ( Moderate, LessUnstable, MoreThanAve, A ) 0.038330, 0.711013, 0.250658;
+    ( Moderate, LessUnstable, MoreThanAve, B ) 0.449926, 0.035682, 0.514392;
+    ( Moderate, LessUnstable, MoreThanAve, C ) 0.024934, 0.846435, 0.128631;
+    ( Moderate, LessUnstable, MoreThanAve, D ) 0.192254, 0.789945, 0.017801;
+    ( Moderate, LessUnstable, MoreThanAve, E ) 0.306012, 0.235073, 0.458915;
+    ( Moderate, LessUnstable, MoreThanAve, F ) 0.079383, 0.087200, 0.833417;
+    ( Moderate, LessUnstable, MoreThanAve, G ) 0.592223, 0.068320, 0.339457;
+    ( Moderate, LessUnstable, MoreThanAve, H ) 0.496651, 0.322500, 0.180848;
+    ( Moderate, LessUnstable, MoreThanAve, I ) 0.326006, 0.534358, 0.139636;
+    ( Moderate, LessUnstable, MoreThanAve, J ) 0.187911, 0.186932, 0.625157;
+    ( Moderate, LessUnstable, MoreThanAve, K ) 0.124614, 0.135971, 0.739415;
+    ( Moderate, Average, LessThanAve, A ) 0.103419, 0.529788, 0.366792;
+    ( Moderate, Average, LessThanAve, B ) 0.050624, 0.703961, 0.245415;
+    ( Moderate, Average, LessThanAve, C ) 0.133831, 0.129305, 0.736864;
+    ( Moderate, Average, LessThanAve, D ) 0.550110, 0.018088, 0.431802;
+    ( Moderate, Average, LessThanAve, E ) 0.376791, 0.096045, 0.527164;
+    ( Moderate, Average, LessThanAve, F ) 0.335203, 0.443209, 0.221588;
+    ( Moderate, Average, LessThanAve, G ) 0.133735, 0.405147, 0.461118;
+    ( Moderate, Average, LessThanAve, H ) 0.486597, 0.162325, 0.351077;
+    ( Moderate, Average, LessThanAve, I ) 0.050502, 0.903158, 0.046341;
+    ( Moderate, Average, LessThanAve, J ) 0.230164, 0.054134, 0.715702;
+    ( Moderate, Average, LessThanAve, K ) 0.445963, 0.111224, 0.442813;
+    ( Moderate, Average, Average, A ) 0.104524, 0.330489, 0.564987;
+    ( Moderate, Average, Average, B ) 0.276086, 0.057832, 0.666081;
+    ( Moderate, Average, Average, C ) 0.351322, 0.146365, 0.502313;
+    ( Moderate, Average, Average, D ) 0.024108, 0.838248, 0.137644;
+    ( Moderate, Average, Average, E ) 0.153211, 0.365836, 0.480953;
+    ( Moderate, Average, Average, F ) 0.133456, 0.246909, 0.619635;
+    ( Moderate, Average, Average, G ) 0.744834, 0.190320, 0.064846;
+    ( Moderate, Average, Average, H ) 0.317543, 0.319417, 0.363039;
+    ( Moderate, Average, Average, I ) 0.102691, 0.404330, 0.492979;
+    ( Moderate, Average, Average, J ) 0.373264, 0.462555, 0.164181;
+    ( Moderate, Average, Average, K ) 0.197380, 0.057669, 0.744951;
+    ( Moderate, Average, MoreThanAve, A ) 0.226763, 0.391387, 0.381851;
+    ( Moderate, Average, MoreThanAve, B ) 0.452149, 0.237929, 0.309922;
+    ( Moderate, Average, MoreThanAve, C ) 0.772344, 0.138517, 0.089138;
+    ( Moderate, Average, MoreThanAve, D ) 0.116075, 0.449386, 0.434539;
+    ( Moderate, Average, MoreThanAve, E ) 0.061140, 0.278708, 0.660152;
+    ( Moderate, Average, MoreThanAve, F ) 0.763764, 0.052537, 0.183699;
+    ( Moderate, Average, MoreThanAve, G ) 0.434198, 0.281539, 0.284263;
+    ( Moderate, Average, MoreThanAve, H ) 0.174724, 0.394773, 0.430503;
+    ( Moderate, Average, MoreThanAve, I ) 0.121969, 0.535711, 0.342320;
+    ( Moderate, Average, MoreThanAve, J ) 0.698480, 0.159843, 0.141676;
+    ( Moderate, Average, MoreThanAve, K ) 0.161263, 0.316913, 0.521824;
+    ( Moderate, MoreUnstable, LessThanAve, A ) 0.061535, 0.375361, 0.563103;
+    ( Moderate, MoreUnstable, LessThanAve, B ) 0.072751, 0.864089, 0.063160;
+    ( Moderate, MoreUnstable, LessThanAve, C ) 0.040405, 0.382127, 0.577467;
+    ( Moderate, MoreUnstable, LessThanAve, D ) 0.405476, 0.026879, 0.567645;
+    ( Moderate, MoreUnstable, LessThanAve, E ) 0.060743, 0.467575, 0.471682;
+    ( Moderate, MoreUnstable, LessThanAve, F ) 0.202939, 0.179900, 0.617161;
+    ( Moderate, MoreUnstable, LessThanAve, G ) 0.514291, 0.182087, 0.303622;
+    ( Moderate, MoreUnstable, LessThanAve, H ) 0.409003, 0.018178, 0.572819;
+    ( Moderate, MoreUnstable, LessThanAve, I ) 0.191849, 0.586548, 0.221603;
+    ( Moderate, MoreUnstable, LessThanAve, J ) 0.159637, 0.418672, 0.421691;
+    ( Moderate, MoreUnstable, LessThanAve, K ) 0.755749, 0.201327, 0.042925;
+    ( Moderate, MoreUnstable, Average, A ) 0.916744, 0.071143, 0.012112;
+    ( Moderate, MoreUnstable, Average, B ) 0.490662, 0.488298, 0.021040;
+    ( Moderate, MoreUnstable, Average, C ) 0.030094, 0.597615, 0.372291;
+    ( Moderate, MoreUnstable, Average, D ) 0.251394, 0.188221, 0.560384;
+    ( Moderate, MoreUnstable, Average, E ) 0.547790, 0.080611, 0.371600;
+    ( Moderate, MoreUnstable, Average, F ) 0.062401, 0.022294, 0.915304;
+    ( Moderate, MoreUnstable, Average, G ) 0.301704, 0.505716, 0.192581;
+    ( Moderate, MoreUnstable, Average, H ) 0.478957, 0.422442, 0.098601;
+    ( Moderate, MoreUnstable, Average, I ) 0.924921, 0.064489, 0.010590;
+    ( Moderate, MoreUnstable, Average, J ) 0.308861, 0.602077, 0.089062;
+    ( Moderate, MoreUnstable, Average, K ) 0.471789, 0.283024, 0.245188;
+    ( Moderate, MoreUnstable, MoreThanAve, A ) 0.397636, 0.496403, 0.105961;
+    ( Moderate, MoreUnstable, MoreThanAve, B ) 0.378166, 0.274881, 0.346953;
+    ( Moderate, MoreUnstable, MoreThanAve, C ) 0.508492, 0.235850, 0.255658;
+    ( Moderate, MoreUnstable, MoreThanAve, D ) 0.020320, 0.616716, 0.362964;
+    ( Moderate, MoreUnstable, MoreThanAve, E ) 0.971817, 0.021524, 0.006659;
+    ( Moderate, MoreUnstable, MoreThanAve, F ) 0.494969, 0.149315, 0.355715;
+    ( Moderate, MoreUnstable, MoreThanAve, G ) 0.183245, 0.600779, 0.215975;
+    ( Moderate, MoreUnstable, MoreThanAve, H ) 0.114963, 0.201476, 0.683561;
+    ( Moderate, MoreUnstable, MoreThanAve, I ) 0.039818, 0.286852, 0.673330;
+    ( Moderate, MoreUnstable, MoreThanAve, J ) 0.361932, 0.253838, 0.384230;
+    ( Moderate, MoreUnstable, MoreThanAve, K ) 0.069152, 0.595039, 0.335809;
+    ( Strong, LessUnstable, LessThanAve, A ) 0.021619, 0.247573, 0.730808;
+    ( Strong, LessUnstable, LessThanAve, B ) 0.041929, 0.895829, 0.062243;
+    ( Strong, LessUnstable, LessThanAve, C ) 0.336402, 0.019938, 0.643659;
+    ( Strong, LessUnstable, LessThanAve, D ) 0.383413, 0.446038, 0.170549;
+    ( Strong, LessUnstable, LessThanAve, E ) 0.115939, 0.684299, 0.199762;
+    ( Strong, LessUnstable, LessThanAve, F ) 0.729085, 0.040263, 0.230652;
+    ( Strong, LessUnstable, LessThanAve, G ) 0.518751, 0.121084, 0.360166;
+    ( Strong, LessUnstable, LessThanAve, H ) 0.480943, 0.215910, 0.303146;
+    ( Strong, LessUnstable, LessThanAve, I ) 0.429114, 0.475573, 0.095314;
+    ( Strong, LessUnstable, LessThanAve, J ) 0.688166, 0.017139, 0.294696;
+    ( Strong, LessUnstable, LessThanAve, K ) 0.217777, 0.395503, 0.386720;
+    ( Strong, LessUnstable, Average, A ) 0.210663, 0.191866, 0.597471;
+    ( Strong, LessUnstable, Average, B ) 0.021239, 0.255970, 0.722791;
+    ( Strong, LessUnstable, Average, C ) 0.485402, 0.245686, 0.268912;
+    ( Strong, LessUnstable, Average, D ) 0.071213, 0.532757, 0.396030;
+    ( Strong, LessUnstable, Average, E ) 0.129089, 0.507755, 0.363157;
+    ( Strong, LessUnstable, Average, F ) 0.466191, 0.253011, 0.280799;
+    ( Strong, LessUnstable, Average, G ) 0.385753, 0.265963, 0.348284;
+    ( Strong, LessUnstable, Average, H ) 0.447484, 0.540451, 0.012066;
+    ( Strong, LessUnstable, Average, I ) 0.204334, 0.530357, 0.265309;
+    ( Strong, LessUnstable, Average, J ) 0.364581, 0.040509, 0.594910;
+    ( Strong, LessUnstable, Average, K ) 0.282765, 0.173720, 0.543515;
+    ( Strong, LessUnstable, MoreThanAve, A ) 0.073665, 0.264481, 0.661853;
+    ( Strong, LessUnstable, MoreThanAve, B ) 0.016625, 0.706280, 0.277095;
+    ( Strong, LessUnstable, MoreThanAve, C ) 0.570628, 0.381335, 0.048037;
+    ( Strong, LessUnstable, MoreThanAve, D ) 0.078132, 0.532222, 0.389646;
+    ( Strong, LessUnstable, MoreThanAve, E ) 0.027041, 0.075422, 0.897537;
+    ( Strong, LessUnstable, MoreThanAve, F ) 0.026136, 0.047158, 0.926706;
+    ( Strong, LessUnstable, MoreThanAve, G ) 0.630724, 0.218609, 0.150667;
+    ( Strong, LessUnstable, MoreThanAve, H ) 0.332876, 0.125130, 0.541994;
+    ( Strong, LessUnstable, MoreThanAve, I ) 0.488575, 0.333705, 0.177720;
+    ( Strong, LessUnstable, MoreThanAve, J ) 0.124591, 0.239386, 0.636023;
+    ( Strong, LessUnstable, MoreThanAve, K ) 0.221373, 0.218562, 0.560065;
+    ( Strong, Average, LessThanAve, A ) 0.052827, 0.222588, 0.724584;
+    ( Strong, Average, LessThanAve, B ) 0.269922, 0.036214, 0.693863;
+    ( Strong, Average, LessThanAve, C ) 0.215705, 0.591076, 0.193219;
+    ( Strong, Average, LessThanAve, D ) 0.156305, 0.349203, 0.494492;
+    ( Strong, Average, LessThanAve, E ) 0.330902, 0.328958, 0.340139;
+    ( Strong, Average, LessThanAve, F ) 0.533059, 0.104338, 0.362603;
+    ( Strong, Average, LessThanAve, G ) 0.147368, 0.663003, 0.189629;
+    ( Strong, Average, LessThanAve, H ) 0.640864, 0.150299, 0.208836;
+    ( Strong, Average, LessThanAve, I ) 0.700546, 0.183973, 0.115481;
+    ( Strong, Average, LessThanAve, J ) 0.542867, 0.273369, 0.183765;
+    ( Strong, Average, LessThanAve, K ) 0.116789, 0.014513, 0.868698;
+    ( Strong, Average, Average, A ) 0.626745, 0.074192, 0.299063;
+    ( Strong, Average, Average, B ) 0.516483, 0.080995, 0.402522;
+    ( Strong, Average, Average, C ) 0.186005, 0.495135, 0.318860;
+    ( Strong, Average, Average, D ) 0.027304, 0.650755, 0.321940;
+    ( Strong, Average, Average, E ) 0.671497, 0.193975, 0.134528;
+    ( Strong, Average, Average, F ) 0.318722, 0.212999, 0.468279;
+    ( Strong, Average, Average, G ) 0.291916, 0.278255, 0.429829;
+    ( Strong, Average, Average, H ) 0.258198, 0.619065, 0.122737;
+    ( Strong, Average, Average, I ) 0.425672, 0.548719, 0.025610;
+    ( Strong, Average, Average, J ) 0.136411, 0.399489, 0.464100;
+    ( Strong, Average, Average, K ) 0.568322, 0.200615, 0.231063;
+    ( Strong, Average, MoreThanAve, A ) 0.304960, 0.682815, 0.012225;
+    ( Strong, Average, MoreThanAve, B ) 0.361325, 0.175878, 0.462796;
+    ( Strong, Average, MoreThanAve, C ) 0.116982, 0.035630, 0.847388;
+    ( Strong, Average, MoreThanAve, D ) 0.047471, 0.358875, 0.593654;
+    ( Strong, Average, MoreThanAve, E ) 0.254005, 0.477901, 0.268094;
+    ( Strong, Average, MoreThanAve, F ) 0.292329, 0.431232, 0.276438;
+    ( Strong, Average, MoreThanAve, G ) 0.296054, 0.200690, 0.503256;
+    ( Strong, Average, MoreThanAve, H ) 0.220024, 0.274319, 0.505657;
+    ( Strong, Average, MoreThanAve, I ) 0.138855, 0.196497, 0.664648;
+    ( Strong, Average, MoreThanAve, J ) 0.300262, 0.595033, 0.104705;
+    ( Strong, Average, MoreThanAve, K ) 0.080294, 0.206742, 0.712964;
+    ( Strong, MoreUnstable, LessThanAve, A ) 0.023349, 0.966457, 0.010194;
+    ( Strong, MoreUnstable, LessThanAve, B ) 0.132733, 0.296192, 0.571075;
+    ( Strong, MoreUnstable, LessThanAve, C ) 0.713740, 0.173149, 0.113111;
+    ( Strong, MoreUnstable, LessThanAve, D ) 0.601900, 0.110496, 0.287604;
+    ( Strong, MoreUnstable, LessThanAve, E ) 0.596740, 0.278222, 0.125038;
+    ( Strong, MoreUnstable, LessThanAve, F ) 0.619243, 0.247902, 0.132856;
+    ( Strong, MoreUnstable, LessThanAve, G ) 0.612449, 0.180891, 0.206660;
+    ( Strong, MoreUnstable, LessThanAve, H ) 0.116930, 0.235823, 0.647248;
+    ( Strong, MoreUnstable, LessThanAve, I ) 0.047466, 0.135585, 0.816948;
+    ( Strong, MoreUnstable, LessThanAve, J ) 0.067452, 0.903496, 0.029051;
+    ( Strong, MoreUnstable, LessThanAve, K ) 0.031001, 0.878331, 0.090669;
+    ( Strong, MoreUnstable, Average, A ) 0.090861, 0.342961, 0.566178;
+    ( Strong, MoreUnstable, Average, B ) 0.513026, 0.174166, 0.312809;
+    ( Strong, MoreUnstable, Average, C ) 0.478191, 0.444107, 0.077702;
+    ( Strong, MoreUnstable, Average, D ) 0.502265, 0.400690, 0.097045;
+    ( Strong, MoreUnstable, Average, E ) 0.547883, 0.261079, 0.191037;
+    ( Strong, MoreUnstable, Average, F ) 0.296293, 0.093932, 0.609775;
+    ( Strong, MoreUnstable, Average, G ) 0.230475, 0.522296, 0.247229;
+    ( Strong, MoreUnstable, Average, H ) 0.458524, 0.280005, 0.261471;
+    ( Strong, MoreUnstable, Average, I ) 0.049286, 0.393917, 0.556798;
+    ( Strong, MoreUnstable, Average, J ) 0.870641, 0.021508, 0.107851;
+    ( Strong, MoreUnstable, Average, K ) 0.860377, 0.037876, 0.101746;
+    ( Strong, MoreUnstable, MoreThanAve, A ) 0.380648, 0.607411, 0.011942;
+    ( Strong, MoreUnstable, MoreThanAve, B ) 0.220438, 0.103210, 0.676352;
+    ( Strong, MoreUnstable, MoreThanAve, C ) 0.607268, 0.123761, 0.268971;
+    ( Strong, MoreUnstable, MoreThanAve, D ) 0.420190, 0.526814, 0.052996;
+    ( Strong, MoreUnstable, MoreThanAve, E ) 0.049727, 0.395627, 0.554646;
+    ( Strong, MoreUnstable, MoreThanAve, F ) 0.459884, 0.059423, 0.480693;
+    ( Strong, MoreUnstable, MoreThanAve, G ) 0.109270, 0.834725, 0.056005;
+    ( Strong, MoreUnstable, MoreThanAve, H ) 0.482982, 0.149062, 0.367956;
+    ( Strong, MoreUnstable, MoreThanAve, I ) 0.342833, 0.451728, 0.205439;
+    ( Strong, MoreUnstable, MoreThanAve, J ) 0.408828, 0.090372, 0.500800;
+    ( Strong, MoreUnstable, MoreThanAve, K ) 0.061697, 0.255763, 0.682540;
+};
+
+probability ( N34StarFcst | ScenRel3_4, PlainsFcst ) {
+    ( ACEFK, XNIL ) 0.208733, 0.086850, 0.704417;
+    ( ACEFK, SIG ) 0.568265, 0.414508, 0.017227;
+    ( ACEFK, SVR ) 0.104017, 0.867268, 0.028715;
+    ( B, XNIL ) 0.092495, 0.679090, 0.228415;
+    ( B, SIG ) 0.021544, 0.546895, 0.431561;
+    ( B, SVR ) 0.337422, 0.535342, 0.127236;
+    ( D, XNIL ) 0.745928, 0.011461, 0.242610;
+    ( D, SIG ) 0.618337, 0.351028, 0.030634;
+    ( D, SVR ) 0.122972, 0.725051, 0.151977;
+    ( GJ, XNIL ) 0.692298, 0.015083, 0.292619;
+    ( GJ, SIG ) 0.218229, 0.237307, 0.544464;
+    ( GJ, SVR ) 0.068846, 0.529157, 0.401997;
+    ( HI, XNIL ) 0.058611, 0.301102, 0.640287;
+    ( HI, SIG ) 0.191780, 0.775136, 0.033084;
+    ( HI, SVR ) 0.616070, 0.354038, 0.029893;
+};
+
+probability ( R5Fcst | MountainFcst, N34StarFcst ) {
+    ( XNIL, XNIL ) 0.073138, 0.867152, 0.059710;
+    ( XNIL, SIG ) 0.812621, 0.125699, 0.061680;
+    ( XNIL, SVR ) 0.265685, 0.644991, 0.089324;
+    ( SIG, XNIL ) 0.046849, 0.444667, 0.508484;
+    ( SIG, SIG ) 0.099538, 0.836963, 0.063500;
+    ( SIG, SVR ) 0.473994, 0.191546, 0.334460;
+    ( SVR, XNIL ) 0.469233, 0.319721, 0.211046;
+    ( SVR, SIG ) 0.627067, 0.221790, 0.151143;
+    ( SVR, SVR ) 0.213747, 0.534916, 0.251337;
+};
+
+probability ( Dewpoints | Scenario ) {
+    ( A ) 0.094463, 0.296719, 0.066326, 0.073726, 0.099698, 0.214404, 0.154664;
+    ( B ) 0.198706, 0.099333, 0.226026, 0.212460, 0.040560, 0.107890, 0.115026;
+    ( C ) 0.093989, 0.235132, 0.252711, 0.221534, 0.064056, 0.024618, 0.107960;
+    ( D ) 0.001462, 0.017814, 0.548295, 0.182183, 0.084656, 0.097775, 0.067814;
+    ( E ) 0.105425, 0.228350, 0.084739, 0.263754, 0.060516, 0.084998, 0.172218;
+    ( F ) 0.060040, 0.085264, 0.566520, 0.027851, 0.013335, 0.001082, 0.245908;
+    ( G ) 0.083388, 0.303823, 0.129471, 0.175558, 0.075636, 0.101801, 0.130322;
+    ( H ) 0.036648, 0.163395, 0.133452, 0.040247, 0.477040, 0.054042, 0.095176;
+    ( I ) 0.339551, 0.051290, 0.010367, 0.097608, 0.016908, 0.197279, 0.286998;
+    ( J ) 0.008458, 0.213007, 0.035982, 0.430232, 0.149548, 0.045569, 0.117204;
+    ( K ) 0.293483, 0.032106, 0.092835, 0.035243, 0.108120, 0.052497, 0.385716;
+};
+
+probability ( LowLLapse | Scenario ) {
+    ( A ) 0.526509, 0.067196, 0.114899, 0.291396;
+    ( B ) 0.780300, 0.056451, 0.078148, 0.085101;
+    ( C ) 0.249097, 0.051225, 0.555874, 0.143804;
+    ( D ) 0.135427, 0.137049, 0.041231, 0.686294;
+    ( E ) 0.681298, 0.068377, 0.099089, 0.151236;
+    ( F ) 0.174710, 0.192357, 0.340668, 0.292265;
+    ( G ) 0.354669, 0.224327, 0.070606, 0.350397;
+    ( H ) 0.130508, 0.157443, 0.430332, 0.281717;
+    ( I ) 0.071731, 0.776664, 0.036096, 0.115509;
+    ( J ) 0.158164, 0.224403, 0.270275, 0.347158;
+    ( K ) 0.252555, 0.282790, 0.458848, 0.005807;
+};
+
+probability ( MeanRH | Scenario ) {
+    ( A ) 0.301061, 0.405560, 0.293379;
+    ( B ) 0.536042, 0.261719, 0.202239;
+    ( C ) 0.552211, 0.384301, 0.063488;
+    ( D ) 0.150579, 0.740040, 0.109382;
+    ( E ) 0.262349, 0.115478, 0.622173;
+    ( F ) 0.706973, 0.172521, 0.120506;
+    ( G ) 0.229797, 0.219336, 0.550868;
+    ( H ) 0.473509, 0.314916, 0.211575;
+    ( I ) 0.851321, 0.121738, 0.026941;
+    ( J ) 0.647828, 0.060324, 0.291848;
+    ( K ) 0.135574, 0.408336, 0.456090;
+};
+
+probability ( MidLLapse | Scenario ) {
+    ( A ) 0.142966, 0.184209, 0.672825;
+    ( B ) 0.097775, 0.554848, 0.347377;
+    ( C ) 0.546311, 0.208823, 0.244866;
+    ( D ) 0.319700, 0.083459, 0.596841;
+    ( E ) 0.610217, 0.282505, 0.107278;
+    ( F ) 0.086471, 0.472541, 0.440988;
+    ( G ) 0.493775, 0.396767, 0.109457;
+    ( H ) 0.375191, 0.406092, 0.218717;
+    ( I ) 0.516731, 0.069737, 0.413531;
+    ( J ) 0.203315, 0.532782, 0.263902;
+    ( K ) 0.300255, 0.480582, 0.219163;
+};
+
+probability ( MvmtFeatures | Scenario ) {
+    ( A ) 0.370749, 0.278220, 0.232481, 0.118550;
+    ( B ) 0.432450, 0.172859, 0.219091, 0.175599;
+    ( C ) 0.230452, 0.390525, 0.025303, 0.353719;
+    ( D ) 0.045842, 0.335248, 0.046115, 0.572796;
+    ( E ) 0.225842, 0.366591, 0.015872, 0.391696;
+    ( F ) 0.605415, 0.046394, 0.037435, 0.310756;
+    ( G ) 0.529790, 0.044837, 0.058683, 0.366689;
+    ( H ) 0.328626, 0.520222, 0.065196, 0.085955;
+    ( I ) 0.567469, 0.284828, 0.048184, 0.099519;
+    ( J ) 0.028125, 0.323844, 0.330854, 0.317176;
+    ( K ) 0.089300, 0.251866, 0.067751, 0.591084;
+};
+
+probability ( RHRatio | Scenario ) {
+    ( A ) 0.848547, 0.108560, 0.042893;
+    ( B ) 0.269137, 0.481250, 0.249612;
+    ( C ) 0.258203, 0.668846, 0.072952;
+    ( D ) 0.094301, 0.580443, 0.325256;
+    ( E ) 0.413599, 0.235719, 0.350682;
+    ( F ) 0.147022, 0.008293, 0.844684;
+    ( G ) 0.152559, 0.713795, 0.133645;
+    ( H ) 0.528050, 0.437622, 0.034329;
+    ( I ) 0.165271, 0.262639, 0.572089;
+    ( J ) 0.349702, 0.032388, 0.617910;
+    ( K ) 0.476442, 0.189246, 0.334312;
+};
+
+probability ( SfcWndShfDis | Scenario ) {
+    ( A ) 0.088743, 0.257128, 0.089842, 0.192326, 0.143085, 0.116034, 0.112842;
+    ( B ) 0.219192, 0.090278, 0.054127, 0.248340, 0.063461, 0.027991, 0.296611;
+    ( C ) 0.012208, 0.257555, 0.162470, 0.216088, 0.208170, 0.033160, 0.110349;
+    ( D ) 0.111923, 0.002112, 0.054934, 0.125383, 0.310611, 0.218834, 0.176203;
+    ( E ) 0.039500, 0.111545, 0.017409, 0.252341, 0.087394, 0.151234, 0.340577;
+    ( F ) 0.358935, 0.121648, 0.049293, 0.055437, 0.099711, 0.147405, 0.167572;
+    ( G ) 0.180198, 0.019124, 0.015405, 0.299504, 0.070502, 0.276744, 0.138523;
+    ( H ) 0.069409, 0.030020, 0.090961, 0.260519, 0.281795, 0.148038, 0.119256;
+    ( I ) 0.173258, 0.013435, 0.018358, 0.209646, 0.208583, 0.365343, 0.011377;
+    ( J ) 0.050004, 0.097774, 0.171016, 0.206714, 0.234211, 0.017937, 0.222344;
+    ( K ) 0.025790, 0.152390, 0.153114, 0.232377, 0.148067, 0.102293, 0.185969;
+};
+
+probability ( SynForcng | Scenario ) {
+    ( A ) 0.229782, 0.135222, 0.228243, 0.325265, 0.081488;
+    ( B ) 0.182653, 0.284012, 0.395371, 0.096087, 0.041877;
+    ( C ) 0.172007, 0.427842, 0.041383, 0.140852, 0.217916;
+    ( D ) 0.236299, 0.165831, 0.154357, 0.180758, 0.262755;
+    ( E ) 0.069134, 0.328260, 0.449059, 0.030455, 0.123091;
+    ( F ) 0.003739, 0.404036, 0.273965, 0.240515, 0.077746;
+    ( G ) 0.209891, 0.279799, 0.081343, 0.344193, 0.084775;
+    ( H ) 0.324227, 0.154220, 0.233147, 0.024893, 0.263513;
+    ( I ) 0.410610, 0.375936, 0.071179, 0.069321, 0.072954;
+    ( J ) 0.313245, 0.359369, 0.236871, 0.045400, 0.045116;
+    ( K ) 0.410278, 0.003553, 0.164812, 0.341755, 0.079603;
+};
+
+probability ( TempDis | Scenario ) {
+    ( A ) 0.163323, 0.083637, 0.359604, 0.393436;
+    ( B ) 0.150328, 0.288862, 0.409847, 0.150963;
+    ( C ) 0.438056, 0.161775, 0.344855, 0.055314;
+    ( D ) 0.895163, 0.021579, 0.042057, 0.041200;
+    ( E ) 0.111930, 0.573014, 0.049460, 0.265596;
+    ( F ) 0.054595, 0.447089, 0.145259, 0.353057;
+    ( G ) 0.130153, 0.060667, 0.490116, 0.319064;
+    ( H ) 0.172105, 0.329626, 0.019738, 0.478531;
+    ( I ) 0.011119, 0.034542, 0.913840, 0.040499;
+    ( J ) 0.490089, 0.053200, 0.225169, 0.231542;
+    ( K ) 0.083611, 0.002671, 0.035192, 0.878525;
+};
+
+probability ( WindAloft | Scenario ) {
+    ( A ) 0.159478, 0.195013, 0.366405, 0.279104;
+    ( B ) 0.431620, 0.013153, 0.116590, 0.438637;
+    ( C ) 0.674983, 0.004291, 0.240037, 0.080689;
+    ( D ) 0.489724, 0.336527, 0.112006, 0.061743;
+    ( E ) 0.143466, 0.025992, 0.071573, 0.758968;
+    ( F ) 0.134961, 0.298705, 0.270425, 0.295909;
+    ( G ) 0.456035, 0.257438, 0.258552, 0.027975;
+    ( H ) 0.315832, 0.330823, 0.348761, 0.004584;
+    ( I ) 0.074749, 0.187239, 0.465669, 0.272343;
+    ( J ) 0.283277, 0.107600, 0.405225, 0.203898;
+    ( K ) 0.268605, 0.302259, 0.190337, 0.238799;
+};
+
+probability ( WindFieldMt | Scenario ) {
+    ( A ) 0.786642, 0.213358;
+    ( B ) 0.827373, 0.172627;
+    ( C ) 0.938469, 0.061531;
+    ( D ) 0.395922, 0.604078;
+    ( E ) 0.402820, 0.597180;
+    ( F ) 0.329822, 0.670178;
+    ( G ) 0.789224, 0.210776;
+    ( H ) 0.802978, 0.197022;
+    ( I ) 0.315611, 0.684389;
+    ( J ) 0.748223, 0.251777;
+    ( K ) 0.286040, 0.713960;
+};
+
+probability ( WindFieldPln | Scenario ) {
+    ( A ) 0.154635, 0.098923, 0.052499, 0.079211, 0.226142, 0.388591;
+    ( B ) 0.083169, 0.049211, 0.206085, 0.221874, 0.013445, 0.426217;
+    ( C ) 0.197212, 0.015589, 0.023455, 0.095875, 0.374530, 0.293339;
+    ( D ) 0.125785, 0.127951, 0.118053, 0.470562, 0.033702, 0.123947;
+    ( E ) 0.110380, 0.002063, 0.398209, 0.163517, 0.237687, 0.088144;
+    ( F ) 0.157936, 0.662538, 0.095562, 0.036358, 0.038470, 0.009135;
+    ( G ) 0.172322, 0.148743, 0.341572, 0.210446, 0.091909, 0.035009;
+    ( H ) 0.071708, 0.079618, 0.122498, 0.230329, 0.025092, 0.470755;
+    ( I ) 0.099545, 0.272459, 0.033942, 0.515385, 0.037603, 0.041065;
+    ( J ) 0.011853, 0.001631, 0.693064, 0.164128, 0.002726, 0.126598;
+    ( K ) 0.708007, 0.077270, 0.087939, 0.035295, 0.028340, 0.063149;
+};
+
