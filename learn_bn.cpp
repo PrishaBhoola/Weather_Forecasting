@@ -2,6 +2,7 @@
 #include "starter.cpp"
 #include <algorithm>
 #include <chrono>
+#include <cmath>
 
 using namespace std;
 
@@ -579,6 +580,75 @@ double em_m_step(network& net, const vector<vector<double>>& expected_counts,
     return max_change;
 }
 
+// Post-normalization to correct floating point imbalances in CPT rows.
+// eps: small threshold below which a row is considered zero and replaced by uniform.
+void normalize_cpts(network& net, double eps = 1e-12) {
+    int N = net.netSize();
+    for (int i = 0; i < N; i++) {
+        auto node = net.get_nth_node(i);
+        vector<string> parents = node->get_Parents();
+        vector<string> values = node->get_values();
+        vector<float> cpt = node->get_CPT();
+
+        int child_n = values.size();
+        // Compute parent combinations
+        int parent_combinations = 1;
+        for (const auto& pname : parents) {
+            auto pnode = net.search_node(pname);
+            parent_combinations *= pnode->get_nvalues();
+        }
+
+        vector<float> new_cpt = cpt;
+
+        if (parents.empty()) {
+            // Unconditional
+            double sum = 0.0;
+            for (int k = 0; k < child_n; k++) sum += cpt[k];
+
+            if (!isfinite(sum) || fabs(sum) <= eps) {
+                // Replace with uniform
+                for (int k = 0; k < child_n; k++) new_cpt[k] = 1.0f / child_n;
+            } else {
+                double s = 0.0;
+                for (int k = 0; k < child_n; k++) {
+                    new_cpt[k] = (float)(cpt[k] / sum);
+                    s += new_cpt[k];
+                }
+                // Fix tiny rounding error to make sum exactly 1.0
+                double diff = 1.0 - s;
+                if (fabs(diff) > 1e-15) {
+                    new_cpt[child_n - 1] = (float)max(0.0, (double)new_cpt[child_n - 1] + diff);
+                }
+            }
+        } else {
+            // Conditional: normalize each parent configuration row
+            for (int pc = 0; pc < parent_combinations; pc++) {
+                double sum = 0.0;
+                int base = pc * child_n;
+                for (int k = 0; k < child_n; k++) sum += cpt[base + k];
+
+                if (!isfinite(sum) || fabs(sum) <= eps) {
+                    // Uniform for this parent configuration
+                    for (int k = 0; k < child_n; k++) new_cpt[base + k] = 1.0f / child_n;
+                } else {
+                    double s = 0.0;
+                    for (int k = 0; k < child_n; k++) {
+                        new_cpt[base + k] = (float)(cpt[base + k] / sum);
+                        s += new_cpt[base + k];
+                    }
+                    double diff = 1.0 - s;
+                    if (fabs(diff) > 1e-15) {
+                        int last_idx = base + child_n - 1;
+                        new_cpt[last_idx] = (float)max(0.0, (double)new_cpt[last_idx] + diff);
+                    }
+                }
+            }
+        }
+
+        node->set_CPT(new_cpt);
+    }
+}
+
 // Main learning function
 void learn_parameters(network& net, const vector<Record>& records, 
                      double convergence_threshold = 1e-7,
@@ -659,13 +729,26 @@ void learn_parameters(network& net, const vector<Record>& records,
         auto iter_duration = chrono::duration_cast<chrono::milliseconds>(iter_end - iter_start);
         
         iter++;
-        cout << "Iteration " << iter << ": max parameter change = " 
-             << fixed << setprecision(8) << max_change 
-             << " (time: " << iter_duration.count() << " ms)" << endl;
+        
+        // Apply alpha decay for weighted convergence (helps refine small probabilities)
+        alpha *= 0.95;
+        
+        // Log iteration info (include alpha every 10 iterations)
+        if (iter % 10 == 0 || iter == 1) {
+            cout << "Iteration " << iter << ": max parameter change = " 
+                 << fixed << setprecision(8) << max_change 
+                 << ", alpha = " << setprecision(6) << alpha
+                 << " (time: " << iter_duration.count() << " ms)" << endl;
+        } else {
+            cout << "Iteration " << iter << ": max parameter change = " 
+                 << fixed << setprecision(8) << max_change 
+                 << " (time: " << iter_duration.count() << " ms)" << endl;
+        }
         
         // Check convergence
         if (max_change < convergence_threshold) {
-            cout << "Converged after " << iter << " iterations!" << endl;
+            cout << "Converged after " << iter << " iterations (final alpha = " 
+                 << setprecision(6) << alpha << ")" << endl;
             break;
         }
     }
@@ -673,6 +756,14 @@ void learn_parameters(network& net, const vector<Record>& records,
     auto end_time = chrono::high_resolution_clock::now();
     auto total_duration = chrono::duration_cast<chrono::seconds>(end_time - start_time);
     cout << "\nTotal learning time: " << total_duration.count() << " seconds" << endl;
+
+    // Post-normalization to fix tiny numeric imbalances in CPT rows
+    cout << "Post-normalizing CPT rows with eps=1e-12 to correct floating-point noise..." << endl;
+    auto norm_start = chrono::high_resolution_clock::now();
+    normalize_cpts(net, 1e-12);
+    auto norm_end = chrono::high_resolution_clock::now();
+    auto norm_duration = chrono::duration_cast<chrono::milliseconds>(norm_end - norm_start);
+    cout << "Post-normalization completed in " << norm_duration.count() << " ms" << endl;
 }
 
 int main(int argc, char* argv[]) {
