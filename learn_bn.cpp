@@ -275,6 +275,100 @@ void initialize_cpt_from_complete(network& net, const vector<Record>& records,
     }
 }
 
+// Compute P(missing_var = value | Markov Blanket evidence) using Bayes' rule
+// Markov blanket = parents + children + co-parents (other parents of children)
+double compute_markov_blanket_probability(network& net, int missing_var_idx, int value_idx,
+                                          const Record& record, const vector<string>& all_possible_values) {
+    auto missing_node = net.get_nth_node(missing_var_idx);
+    vector<string> parents = missing_node->get_Parents();
+    vector<int> children = missing_node->get_children();
+    
+    double prob = 1.0;
+    
+    // Part 1: P(missing_var = value | parents)
+    // Get parent indices and values
+    vector<int> parent_val_indices;
+    bool valid_parents = true;
+    for (const auto& pname : parents) {
+        int parent_idx = net.get_index(pname);
+        auto pnode = net.search_node(pname);
+        auto pvals = pnode->get_values();
+        int val_idx = get_value_index(pvals, record.values[parent_idx]);
+        if (val_idx < 0) {
+            valid_parents = false;
+            break;
+        }
+        parent_val_indices.push_back(val_idx);
+    }
+    
+    if (valid_parents) {
+        // Get probability from CPT
+        vector<int> parent_radices;
+        for (const auto& pname : parents) {
+            auto pnode = net.search_node(pname);
+            parent_radices.push_back(pnode->get_nvalues());
+        }
+        
+        int cpt_idx = compute_cpt_index_v2(parent_radices, parent_val_indices, 
+                                           value_idx, all_possible_values.size());
+        vector<float> cpt = missing_node->get_CPT();
+        if (cpt_idx >= 0 && cpt_idx < cpt.size()) {
+            prob *= cpt[cpt_idx];
+        }
+    }
+    
+    // Part 2: For each child, multiply by P(child_value | missing_var=value, other_parents)
+    for (int child_idx : children) {
+        auto child_node = net.get_nth_node(child_idx);
+        vector<string> child_parents = child_node->get_Parents();
+        vector<string> child_values = child_node->get_values();
+        
+        // Get the observed value of this child
+        string child_observed_val = record.values[child_idx];
+        int child_val_idx = get_value_index(child_values, child_observed_val);
+        if (child_val_idx < 0) continue; // Child value is missing or invalid
+        
+        // Build parent configuration for the child
+        vector<int> child_parent_radices;
+        vector<int> child_parent_val_indices;
+        bool valid_child_parents = true;
+        
+        for (const auto& cpname : child_parents) {
+            int cp_idx = net.get_index(cpname);
+            auto cpnode = net.search_node(cpname);
+            auto cpvals = cpnode->get_values();
+            child_parent_radices.push_back(cpvals.size());
+            
+            int cp_val_idx;
+            if (cp_idx == missing_var_idx) {
+                // This parent is the missing variable, use hypothetical value
+                cp_val_idx = value_idx;
+            } else {
+                // Use observed value
+                cp_val_idx = get_value_index(cpvals, record.values[cp_idx]);
+                if (cp_val_idx < 0) {
+                    valid_child_parents = false;
+                    break;
+                }
+            }
+            child_parent_val_indices.push_back(cp_val_idx);
+        }
+        
+        if (valid_child_parents) {
+            // Get P(child = observed_value | parents including missing_var=value)
+            int child_cpt_idx = compute_cpt_index_v2(child_parent_radices, 
+                                                     child_parent_val_indices,
+                                                     child_val_idx, child_values.size());
+            vector<float> child_cpt = child_node->get_CPT();
+            if (child_cpt_idx >= 0 && child_cpt_idx < child_cpt.size()) {
+                prob *= child_cpt[child_cpt_idx];
+            }
+        }
+    }
+    
+    return prob;
+}
+
 // EM Algorithm - E-step: compute expected counts from incomplete records
 void em_e_step(network& net, const vector<Record>& records, 
                vector<vector<double>>& expected_counts, double alpha) {
@@ -340,40 +434,13 @@ void em_e_step(network& net, const vector<Record>& records,
         int miss_idx = rec.missing_index;
         auto miss_node = net.get_nth_node(miss_idx);
         auto miss_values = miss_node->get_values();
-        auto miss_parents = miss_node->get_Parents();
         
-        // Compute P(missing_var = v | parents, other_evidence) for each possible value
-        vector<double> probs(miss_values.size(), 1.0);
+        // Compute P(missing_var = v | Markov Blanket) for each possible value
+        // Uses parents + children + co-parents for better inference
+        vector<double> probs(miss_values.size(), 0.0);
         
-        // Get parent values for missing variable
-        vector<int> miss_parent_radices;
-        vector<int> miss_parent_indices;
-        bool valid = true;
-        
-        for (const auto& pname : miss_parents) {
-            int parent_idx = net.get_index(pname);
-            auto pnode = net.search_node(pname);
-            auto pvals = pnode->get_values();
-            miss_parent_radices.push_back(pvals.size());
-            
-            int val_idx = get_value_index(pvals, rec.values[parent_idx]);
-            if (val_idx < 0) {
-                valid = false;
-                break;
-            }
-            miss_parent_indices.push_back(val_idx);
-        }
-        
-        if (valid) {
-            // Get probabilities from CPT of missing variable
-            vector<float> miss_cpt = miss_node->get_CPT();
-            for (int v = 0; v < miss_values.size(); v++) {
-                int cpt_idx = compute_cpt_index_v2(miss_parent_radices, miss_parent_indices, 
-                                                   v, miss_values.size());
-                if (cpt_idx >= 0 && cpt_idx < miss_cpt.size()) {
-                    probs[v] = miss_cpt[cpt_idx];
-                }
-            }
+        for (int v = 0; v < miss_values.size(); v++) {
+            probs[v] = compute_markov_blanket_probability(net, miss_idx, v, rec, miss_values);
         }
         
         // Normalize probabilities
@@ -381,6 +448,9 @@ void em_e_step(network& net, const vector<Record>& records,
         for (double p : probs) prob_sum += p;
         if (prob_sum > 0) {
             for (double& p : probs) p /= prob_sum;
+        } else {
+            // Fallback to uniform if all probabilities are zero
+            for (double& p : probs) p = 1.0 / miss_values.size();
         }
         
         // For each possible value of missing variable, add fractional counts
@@ -512,7 +582,7 @@ double em_m_step(network& net, const vector<vector<double>>& expected_counts,
 // Main learning function
 void learn_parameters(network& net, const vector<Record>& records, 
                      double convergence_threshold = 1e-7,
-                     double alpha = 0.6) {
+                     double alpha = 0.4) {
     
     cout << "Starting parameter learning..." << endl;
     cout << "Total records: " << records.size() << endl;
@@ -537,10 +607,33 @@ void learn_parameters(network& net, const vector<Record>& records,
     auto duration = chrono::duration_cast<chrono::milliseconds>(init_time - start_time);
     cout << "Initialization completed in " << duration.count() << " ms" << endl;
     
-    // EM iterations
+    // Pseudo-EM Initialization: Run 2 light EM iterations to refine initial estimates
+    cout << "\nRunning Pseudo-EM initialization (2 light iterations)..." << endl;
     int N = net.netSize();
     vector<vector<double>> expected_counts(N);
     
+    for (int pre_iter = 0; pre_iter < 2; pre_iter++) {
+        auto pseudo_start = chrono::high_resolution_clock::now();
+        
+        // E-step on incomplete records only
+        em_e_step(net, records, expected_counts, alpha);
+        
+        // M-step
+        double max_change = em_m_step(net, expected_counts, learn_mask);
+        
+        auto pseudo_end = chrono::high_resolution_clock::now();
+        auto pseudo_duration = chrono::duration_cast<chrono::milliseconds>(pseudo_end - pseudo_start);
+        
+        cout << "  Pseudo-EM iteration " << (pre_iter + 1) 
+             << ": max change = " << fixed << setprecision(6) << max_change
+             << " (time: " << pseudo_duration.count() << " ms)" << endl;
+    }
+    
+    auto pseudo_total = chrono::high_resolution_clock::now();
+    auto pseudo_total_duration = chrono::duration_cast<chrono::milliseconds>(pseudo_total - init_time);
+    cout << "Pseudo-EM initialization completed in " << pseudo_total_duration.count() << " ms" << endl;
+    
+    // Main EM iterations
     int iter = 0;
     const double max_time_seconds = 114.0;  // Time limit in seconds
     
