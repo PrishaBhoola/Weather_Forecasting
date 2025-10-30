@@ -872,15 +872,29 @@ vector<vector<float>> save_all_cpts(network& BayesNet) {
     return all_cpts;
 }
 
-int main() {
+int main(int argc, char* argv[]) {
     auto start_time = chrono::high_resolution_clock::now();
 
+    // Default filenames
+    const char* network_file = "hailfinder.bif";
+    const char* data_file = "records.dat";
+    const char* output_file = "solved_hailfinder.bif";
+
+    // Parse command line arguments if provided
+    if (argc >= 3) {
+        network_file = argv[1];
+        data_file = argv[2];
+    }
+    if (argc >= 4) {
+        output_file = argv[3];
+    }
+
     // Read network structure
-    network BayesNet = read_network("hailfinder.bif");
+    network BayesNet = read_network(network_file);
     cout << "Network loaded: " << BayesNet.netSize() << " nodes" << endl;
 
     // Read records
-    vector<DataRecord> records = read_records("records.dat", BayesNet);
+    vector<DataRecord> records = read_records(data_file, BayesNet);
 
     // Count complete vs incomplete records
     int complete = 0, incomplete = 0;
@@ -944,8 +958,8 @@ int main() {
     }
 
     // Write output
-    cout << "Writing output to solved.bif..." << endl;
-    write_network("solved.bif", BayesNet);
+    cout << "Writing output to " << output_file << "..." << endl;
+    write_network(output_file, BayesNet);
 
     auto end_time = chrono::high_resolution_clock::now();
     chrono::duration<double> total_time = end_time - start_time;

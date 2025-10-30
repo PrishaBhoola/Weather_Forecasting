@@ -36,21 +36,11 @@ echo "Data file: $DATA_FILE"
 echo "Output file: solved_hailfinder.bif"
 echo ""
 
-# Run the parameter learner
-# The program expects files named "hailfinder.bif" and "records.dat" in current directory
-# So we create symbolic links if needed
-
-# Create temporary links with expected names
-ln -sf "$NETWORK_FILE" hailfinder.bif
-ln -sf "$DATA_FILE" records.dat
-
-# Run the learner
-./em_solver
+# Run the parameter learner with command-line arguments
+./em_solver "$NETWORK_FILE" "$DATA_FILE" solved_hailfinder.bif
 
 # Check if output was created
-if [ -f "solved.bif" ]; then
-    # Rename output to expected name
-    mv solved.bif solved_hailfinder.bif
+if [ -f "solved_hailfinder.bif" ]; then
     echo ""
     echo "Learning complete! Output written to: solved_hailfinder.bif"
     exit 0

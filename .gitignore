@@ -1,3 +1,14 @@
 *:Zone.Identifier
 *.pdf
 __pycache__/
+*.zip
+test_case_checker/output/
+solver
+em_solver
+analyze_errors.py
+format_checker
+optimize_alpha.py
+alpha_results.json
+alpha_optimization.log
+variable_error_analysis.log
+result.log

@@ -37,9 +37,9 @@ def print_section(title):
 
 def find_test_cases():
     """Find all test case directories."""
-    tc_dir = Path("test_case_checker/tc")
+    tc_dir = Path("tc")
     if not tc_dir.exists():
-        print(f"{Colors.RED}Error: test_case_checker/tc directory not found!{Colors.ENDC}")
+        print(f"{Colors.RED}Error: tc directory not found!{Colors.ENDC}")
         return []
     
     test_cases = [d for d in tc_dir.iterdir() if d.is_dir()]
@@ -88,10 +88,15 @@ def run_compile():
     """Run the compile script."""
     print(f"{Colors.YELLOW}Running compile.sh...{Colors.ENDC}")
     try:
-        result = subprocess.run(['./compile.sh'], 
+        # Get absolute path to parent directory
+        parent_dir = Path(__file__).parent.parent.absolute()
+        compile_script = parent_dir / "compile.sh"
+        
+        result = subprocess.run([str(compile_script)], 
                               capture_output=True, 
                               text=True, 
-                              timeout=60)
+                              timeout=60,
+                              cwd=str(parent_dir))
         if result.returncode == 0:
             print(f"{Colors.GREEN}✓ Compilation successful{Colors.ENDC}")
             return True
@@ -172,15 +177,20 @@ def run_test_case(tc_path, results):
     gold_path = gold_file.absolute()
     
     try:
+        # Get absolute path to parent directory and run.sh
+        parent_dir = Path(__file__).parent.parent.absolute()
+        run_script = parent_dir / "run.sh"
+        
         # Run the solution with actual file paths
-        print(f"{Colors.YELLOW}Executing: ./run.sh {bif_path} {dat_path}{Colors.ENDC}")
+        print(f"{Colors.YELLOW}Executing: run.sh {bif_path} {dat_path}{Colors.ENDC}")
         
         start_time = time.time()
         process = subprocess.Popen(
-            ['./run.sh', str(bif_path), str(dat_path)],
+            [str(run_script), str(bif_path), str(dat_path)],
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
-            text=True
+            text=True,
+            cwd=str(parent_dir)
         )
         
         # Live timer
@@ -204,12 +214,15 @@ def run_test_case(tc_path, results):
         else:
             print(f"{Colors.GREEN}✓ Execution completed in {elapsed:.2f}s{Colors.ENDC}")
 
-            solved_root = Path("solved_hailfinder.bif")
+            # Output file is in parent directory
+            parent_dir = Path(__file__).parent.parent.absolute()
+            solved_root = parent_dir / "solved_hailfinder.bif"
+            
             if not solved_root.exists():
                 result['error'] = "solved file not created"
                 print(f"{Colors.RED}✗ Output file not created: {solved_root}{Colors.ENDC}")
             else:
-                output_root = Path("test_case_checker/output")
+                output_root = Path("output")
                 case_output = output_root / tc_name
                 case_output.mkdir(parents=True, exist_ok=True)
 
@@ -222,7 +235,7 @@ def run_test_case(tc_path, results):
                 python_cmd = get_python_command()
 
                 checker_result = subprocess.run(
-                    [python_cmd, 'test_case_checker/Format_Checker.py',
+                    [python_cmd, 'Format_Checker.py',
                      str(bif_path), str(dest_solved), str(gold_path)],
                     capture_output=True,
                     text=True,
@@ -379,10 +392,15 @@ def generate_report(results):
 def main():
     print_banner()
     
-    # Check if we're in the right directory
-    if not Path("compile.sh").exists() or not Path("run.sh").exists():
-        print(f"{Colors.RED}Error: compile.sh or run.sh not found!{Colors.ENDC}")
-        print(f"{Colors.YELLOW}Make sure you're running this from the main project directory.{Colors.ENDC}")
+    # Check if we're in the right directory (test_case_checker folder)
+    parent_dir = Path(__file__).parent.parent.absolute()
+    compile_script = parent_dir / "compile.sh"
+    run_script = parent_dir / "run.sh"
+    
+    if not compile_script.exists() or not run_script.exists():
+        print(f"{Colors.RED}Error: compile.sh or run.sh not found in parent directory!{Colors.ENDC}")
+        print(f"{Colors.YELLOW}Make sure you're running this from the test_case_checker directory.{Colors.ENDC}")
+        print(f"{Colors.YELLOW}Looking for: {compile_script} and {run_script}{Colors.ENDC}")
         return
     
     # Find test cases
