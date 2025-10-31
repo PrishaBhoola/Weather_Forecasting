@@ -5,15 +5,13 @@
 
 using namespace std;
 
-// Structure to store a data record
 struct Record {
-    vector<string> values;  // values[i] = value of i-th variable, or "?" if missing
-    int missing_index;      // index of missing variable, or -1 if complete
+    vector<string> values;
+    int missing_index;
     
     Record() : missing_index(-1) {}
 };
 
-// Helper function to remove quotes from values
 string remove_quotes(string s) {
     if (s.length() >= 2 && s[0] == '"' && s[s.length()-1] == '"') {
         return s.substr(1, s.length()-2);
@@ -21,7 +19,6 @@ string remove_quotes(string s) {
     return s;
 }
 
-// Read all records from data file
 vector<Record> read_records(const char* filename, int num_vars) {
     vector<Record> records;
     ifstream infile(filename);
@@ -39,7 +36,6 @@ vector<Record> read_records(const char* filename, int num_vars) {
         rec.values.resize(num_vars);
         rec.missing_index = -1;
         
-        // Parse CSV
         stringstream ss(line);
         string value;
         int idx = 0;
@@ -62,7 +58,6 @@ vector<Record> read_records(const char* filename, int num_vars) {
     return records;
 }
 
-// Get index of a value in a node's value list
 int get_value_index(const vector<string>& values, const string& value) {
     for (int i = 0; i < values.size(); i++) {
         if (values[i] == value) return i;
@@ -70,18 +65,15 @@ int get_value_index(const vector<string>& values, const string& value) {
     return -1;
 }
 
-// Compute CPT index from parent values
 int compute_cpt_index(network& net, const vector<string>& parents, 
                       const vector<string>& parent_values, int child_value_idx) {
     if (parents.empty()) {
         return child_value_idx;
     }
     
-    // Compute parent configuration index
     int parent_config = 0;
     int multiplier = 1;
     
-    // Iterate parents from right to left (rightmost cycles fastest)
     for (int p = parents.size() - 1; p >= 0; p--) {
         auto parent_node = net.search_node(parents[p]);
         auto parent_vals = parent_node->get_values();
@@ -93,15 +85,11 @@ int compute_cpt_index(network& net, const vector<string>& parents,
         multiplier *= parent_vals.size();
     }
     
-    // Total index = parent_config * num_child_values + child_value_idx
-    auto node = net.search_node(parents[0]); // dummy, we need child node
-    // Actually we need the child node's nvalues
-    // Let me fix this - we pass child_nvalues
+    auto node = net.search_node(parents[0]);
     
-    return -1; // placeholder, will fix
+    return -1;
 }
 
-// Better version: compute CPT index given parent indices
 int compute_cpt_index_v2(const vector<int>& parent_radices, 
                          const vector<int>& parent_indices, 
                          int child_value_idx, int child_nvalues) {
@@ -109,7 +97,6 @@ int compute_cpt_index_v2(const vector<int>& parent_radices,
         return child_value_idx;
     }
     
-    // Compute parent configuration index
     int parent_config = 0;
     int multiplier = 1;
     
@@ -121,7 +108,6 @@ int compute_cpt_index_v2(const vector<int>& parent_radices,
     return parent_config * child_nvalues + child_value_idx;
 }
 
-// Track which CPT indices need learning (returns mask of indices to learn)
 vector<vector<bool>> identify_learning_params(network& net) {
     int N = net.netSize();
     vector<vector<bool>> learn_mask(N);
@@ -141,7 +127,6 @@ vector<vector<bool>> identify_learning_params(network& net) {
     return learn_mask;
 }
 
-// Initialize unknown parameters to uniform distribution
 void initialize_to_uniform(network& net, const vector<vector<bool>>& learn_mask) {
     int N = net.netSize();
     
@@ -156,9 +141,7 @@ void initialize_to_uniform(network& net, const vector<vector<bool>>& learn_mask)
             parent_combinations *= net.search_node(pname)->get_nvalues();
         }
         
-        // For each parent configuration
         for (int pc = 0; pc < parent_combinations; pc++) {
-            // Check if this configuration needs initialization
             bool needs_init = false;
             for (int k = 0; k < values.size(); k++) {
                 int idx = pc * values.size() + k;
@@ -169,7 +152,6 @@ void initialize_to_uniform(network& net, const vector<vector<bool>>& learn_mask)
             }
             
             if (needs_init) {
-                // Initialize to uniform distribution over child values
                 float uniform_prob = 1.0f / values.size();
                 for (int k = 0; k < values.size(); k++) {
                     int idx = pc * values.size() + k;
@@ -184,21 +166,19 @@ void initialize_to_uniform(network& net, const vector<vector<bool>>& learn_mask)
     }
 }
 
-// Initialize CPT from COMPLETE records only using MLE with Laplace smoothing
 void initialize_from_complete_records(network& net, const vector<Record>& complete_records, 
                                       const vector<vector<bool>>& learn_mask, double alpha) {
     int N = net.netSize();
     
     cout << "  Initializing from " << complete_records.size() << " complete records..." << endl;
     
-    // For each node, count occurrences
     for (int i = 0; i < N; i++) {
         auto node = net.get_nth_node(i);
         vector<string> parents = node->get_Parents();
         vector<string> values = node->get_values();
         vector<float> cpt = node->get_CPT();
         
-        // Check if any parameters need learning
+        
         bool needs_learning = false;
         for (bool mask_val : learn_mask[i]) {
             if (mask_val) {
@@ -209,7 +189,7 @@ void initialize_from_complete_records(network& net, const vector<Record>& comple
         
         if (!needs_learning) continue;
         
-        // Compute parent radices
+        
         vector<int> parent_radices;
         for (const auto& pname : parents) {
             auto pnode = net.search_node(pname);
@@ -219,12 +199,12 @@ void initialize_from_complete_records(network& net, const vector<Record>& comple
         int parent_combinations = 1;
         for (int r : parent_radices) parent_combinations *= r;
         
-        // Initialize counts with Laplace smoothing
+        
         vector<double> counts(cpt.size(), alpha);
         
-        // Count from COMPLETE records only
+        
         for (const auto& rec : complete_records) {
-            // Get parent values
+            
             vector<int> parent_indices;
             bool valid = true;
             
@@ -243,11 +223,11 @@ void initialize_from_complete_records(network& net, const vector<Record>& comple
             
             if (!valid) continue;
             
-            // Get child value
+            
             int child_val_idx = get_value_index(values, rec.values[i]);
             if (child_val_idx < 0) continue;
             
-            // Full count - no weighting needed
+            
             int cpt_idx = compute_cpt_index_v2(parent_radices, parent_indices, 
                                                child_val_idx, values.size());
             if (cpt_idx >= 0 && cpt_idx < counts.size()) {
@@ -255,11 +235,11 @@ void initialize_from_complete_records(network& net, const vector<Record>& comple
             }
         }
         
-        // Normalize to get probabilities
+        
         vector<float> new_cpt = cpt;
         
         if (parents.empty()) {
-            // Unconditional probability
+            
             double sum = 0;
             for (int k = 0; k < values.size(); k++) {
                 sum += counts[k];
@@ -274,7 +254,7 @@ void initialize_from_complete_records(network& net, const vector<Record>& comple
                 }
             }
         } else {
-            // Conditional probability - normalize for each parent configuration
+            
             for (int pc = 0; pc < parent_combinations; pc++) {
                 double sum = 0;
                 for (int k = 0; k < values.size(); k++) {
@@ -298,7 +278,7 @@ void initialize_from_complete_records(network& net, const vector<Record>& comple
     }
 }
 
-// Compute probability of a parent taking a specific value given the evidence
+
 double get_parent_probability(network& net, const Record& rec, 
                               const string& parent_name, int parent_value_idx) {
     int parent_idx = net.get_index(parent_name);
@@ -306,15 +286,15 @@ double get_parent_probability(network& net, const Record& rec,
     auto parent_parents = parent_node->get_Parents();
     auto parent_cpt = parent_node->get_CPT();
     
-    // If parent has no parents, use prior
+    
     if (parent_parents.empty()) {
         if (parent_value_idx >= 0 && parent_value_idx < parent_cpt.size()) {
             return parent_cpt[parent_value_idx];
         }
-        return 1.0 / parent_node->get_nvalues(); // fallback to uniform
+        return 1.0 / parent_node->get_nvalues(); 
     }
     
-    // Parent has parents - compute conditional probability
+    
     vector<int> pp_indices;
     vector<int> pp_radices;
     bool valid = true;
@@ -324,10 +304,10 @@ double get_parent_probability(network& net, const Record& rec,
         auto pp_node = net.search_node(pp_name);
         auto pp_values = pp_node->get_values();
         
-        // Check if this grandparent is observed
+        
         if (rec.missing_index == pp_idx) {
-            // Grandparent is missing - can't compute exact probability
-            // Fall back to uniform
+            
+            
             return 1.0 / parent_node->get_nvalues();
         }
         
@@ -341,10 +321,10 @@ double get_parent_probability(network& net, const Record& rec,
     }
     
     if (!valid) {
-        return 1.0 / parent_node->get_nvalues(); // fallback
+        return 1.0 / parent_node->get_nvalues(); 
     }
     
-    // Compute CPT index
+    
     int cpt_idx = compute_cpt_index_v2(pp_radices, pp_indices, 
                                        parent_value_idx, parent_node->get_nvalues());
     
@@ -352,20 +332,20 @@ double get_parent_probability(network& net, const Record& rec,
         return parent_cpt[cpt_idx];
     }
     
-    return 1.0 / parent_node->get_nvalues(); // fallback
+    return 1.0 / parent_node->get_nvalues(); 
 }
 
-// Compute P(missing_var = value | Markov Blanket evidence) using Bayes' rule
-// Uses LOG-SPACE to prevent numerical underflow
+
+
 double compute_markov_blanket_probability(network& net, int missing_var_idx, int value_idx,
                                           const Record& record, const vector<string>& all_possible_values) {
     auto missing_node = net.get_nth_node(missing_var_idx);
     vector<string> parents = missing_node->get_Parents();
     vector<int> children = missing_node->get_children();
     
-    double log_prob = 0.0;  // Use log-space
+    double log_prob = 0.0;  
     
-    // Part 1: P(missing_var = value | parents)
+    
     vector<int> parent_val_indices;
     bool valid_parents = true;
     for (const auto& pname : parents) {
@@ -381,7 +361,7 @@ double compute_markov_blanket_probability(network& net, int missing_var_idx, int
     }
     
     if (valid_parents) {
-        // Get probability from CPT
+        
         vector<int> parent_radices;
         for (const auto& pname : parents) {
             auto pnode = net.search_node(pname);
@@ -396,23 +376,23 @@ double compute_markov_blanket_probability(network& net, int missing_var_idx, int
             if (prob > 0) {
                 log_prob += log(prob);
             } else {
-                log_prob += log(1e-10); // Small value to avoid -infinity
+                log_prob += log(1e-10); 
             }
         }
     }
     
-    // Part 2: For each child, multiply by P(child_value | missing_var=value, other_parents)
+    
     for (int child_idx : children) {
         auto child_node = net.get_nth_node(child_idx);
         vector<string> child_parents = child_node->get_Parents();
         vector<string> child_values = child_node->get_values();
         
-        // Get the observed value of this child
+        
         string child_observed_val = record.values[child_idx];
         int child_val_idx = get_value_index(child_values, child_observed_val);
         if (child_val_idx < 0) continue;
         
-        // Build parent configuration for the child
+        
         vector<int> child_parent_radices;
         vector<int> child_parent_val_indices;
         bool valid_child_parents = true;
@@ -425,10 +405,10 @@ double compute_markov_blanket_probability(network& net, int missing_var_idx, int
             
             int cp_val_idx;
             if (cp_idx == missing_var_idx) {
-                // This parent is the missing variable, use hypothetical value
+                
                 cp_val_idx = value_idx;
             } else {
-                // Use observed value
+                
                 cp_val_idx = get_value_index(cpvals, record.values[cp_idx]);
                 if (cp_val_idx < 0) {
                     valid_child_parents = false;
@@ -439,7 +419,7 @@ double compute_markov_blanket_probability(network& net, int missing_var_idx, int
         }
         
         if (valid_child_parents) {
-            // Get P(child = observed_value | parents including missing_var=value)
+            
             int child_cpt_idx = compute_cpt_index_v2(child_parent_radices, 
                                                      child_parent_val_indices,
                                                      child_val_idx, child_values.size());
@@ -455,37 +435,37 @@ double compute_markov_blanket_probability(network& net, int missing_var_idx, int
         }
     }
     
-    return exp(log_prob);  // Convert back from log-space
+    return exp(log_prob);  
 }
 
-// EM Algorithm - E-step: compute expected counts from incomplete records
+
 void em_e_step(network& net, const vector<Record>& records, 
                vector<vector<double>>& expected_counts, double alpha) {
     int N = net.netSize();
     
-    // Initialize expected counts with alpha (Laplace smoothing)
+    
     for (int i = 0; i < N; i++) {
         auto node = net.get_nth_node(i);
         expected_counts[i].assign(node->get_CPT().size(), alpha);
     }
     
-    // Add complete records
+    
     for (const auto& rec : records) {
-        if (rec.missing_index >= 0) continue; // skip incomplete for now
+        if (rec.missing_index >= 0) continue; 
         
         for (int i = 0; i < N; i++) {
             auto node = net.get_nth_node(i);
             vector<string> parents = node->get_Parents();
             vector<string> values = node->get_values();
             
-            // Compute parent radices
+            
             vector<int> parent_radices;
             for (const auto& pname : parents) {
                 auto pnode = net.search_node(pname);
                 parent_radices.push_back(pnode->get_nvalues());
             }
             
-            // Get parent indices
+            
             vector<int> parent_indices;
             bool valid = true;
             for (const auto& pname : parents) {
@@ -503,11 +483,11 @@ void em_e_step(network& net, const vector<Record>& records,
             
             if (!valid) continue;
             
-            // Get child value
+            
             int child_val_idx = get_value_index(values, rec.values[i]);
             if (child_val_idx < 0) continue;
             
-            // Update count
+            
             int cpt_idx = compute_cpt_index_v2(parent_radices, parent_indices, 
                                                child_val_idx, values.size());
             if (cpt_idx >= 0 && cpt_idx < expected_counts[i].size()) {
@@ -516,55 +496,55 @@ void em_e_step(network& net, const vector<Record>& records,
         }
     }
     
-    // Add expected counts from incomplete records
+    
     for (const auto& rec : records) {
-        if (rec.missing_index < 0) continue; // skip complete records
+        if (rec.missing_index < 0) continue; 
         
         int miss_idx = rec.missing_index;
         auto miss_node = net.get_nth_node(miss_idx);
         auto miss_values = miss_node->get_values();
         
-        // Compute P(missing_var = v | Markov Blanket) for each possible value
-        // Uses parents + children + co-parents for better inference
+        
+        
         vector<double> probs(miss_values.size(), 0.0);
         
         for (int v = 0; v < miss_values.size(); v++) {
             probs[v] = compute_markov_blanket_probability(net, miss_idx, v, rec, miss_values);
         }
         
-        // Normalize probabilities
+        
         double prob_sum = 0;
         for (double p : probs) prob_sum += p;
         if (prob_sum > 0) {
             for (double& p : probs) p /= prob_sum;
         } else {
-            // Fallback to uniform if all probabilities are zero
+            
             for (double& p : probs) p = 1.0 / miss_values.size();
         }
         
-        // For each possible value of missing variable, add fractional counts
+        
         for (int v = 0; v < miss_values.size(); v++) {
-            // Create a complete record with missing value = v
+            
             Record complete_rec = rec;
             complete_rec.values[miss_idx] = miss_values[v];
             complete_rec.missing_index = -1;
             
             double weight = probs[v];
             
-            // Add weighted counts for all variables
+            
             for (int i = 0; i < N; i++) {
                 auto node = net.get_nth_node(i);
                 vector<string> parents = node->get_Parents();
                 vector<string> values = node->get_values();
                 
-                // Compute parent radices
+                
                 vector<int> parent_radices;
                 for (const auto& pname : parents) {
                     auto pnode = net.search_node(pname);
                     parent_radices.push_back(pnode->get_nvalues());
                 }
                 
-                // Get parent indices
+                
                 vector<int> parent_indices;
                 bool valid_inner = true;
                 for (const auto& pname : parents) {
@@ -582,11 +562,11 @@ void em_e_step(network& net, const vector<Record>& records,
                 
                 if (!valid_inner) continue;
                 
-                // Get child value
+                
                 int child_val_idx = get_value_index(values, complete_rec.values[i]);
                 if (child_val_idx < 0) continue;
                 
-                // Update count with weight
+                
                 int cpt_idx = compute_cpt_index_v2(parent_radices, parent_indices, 
                                                    child_val_idx, values.size());
                 if (cpt_idx >= 0 && cpt_idx < expected_counts[i].size()) {
@@ -597,7 +577,7 @@ void em_e_step(network& net, const vector<Record>& records,
     }
 }
 
-// EM Algorithm - M-step: update parameters from expected counts
+
 double em_m_step(network& net, const vector<vector<double>>& expected_counts,
                  const vector<vector<bool>>& learn_mask) {
     int N = net.netSize();
@@ -609,7 +589,7 @@ double em_m_step(network& net, const vector<vector<double>>& expected_counts,
         vector<string> values = node->get_values();
         vector<float> cpt = node->get_CPT();
         
-        // Check if any parameters need learning
+        
         bool needs_learning = false;
         for (bool mask_val : learn_mask[i]) {
             if (mask_val) {
@@ -620,18 +600,18 @@ double em_m_step(network& net, const vector<vector<double>>& expected_counts,
         
         if (!needs_learning) continue;
         
-        // Compute parent combinations
+        
         int parent_combinations = 1;
         for (const auto& pname : parents) {
             auto pnode = net.search_node(pname);
             parent_combinations *= pnode->get_nvalues();
         }
         
-        // Normalize counts to get probabilities
+        
         vector<float> new_cpt = cpt;
         
         if (parents.empty()) {
-            // Unconditional probability
+            
             double sum = 0;
             for (int k = 0; k < values.size(); k++) {
                 sum += expected_counts[i][k];
@@ -648,7 +628,7 @@ double em_m_step(network& net, const vector<vector<double>>& expected_counts,
                 }
             }
         } else {
-            // Conditional probability
+            
             for (int pc = 0; pc < parent_combinations; pc++) {
                 double sum = 0;
                 for (int k = 0; k < values.size(); k++) {
@@ -676,17 +656,12 @@ double em_m_step(network& net, const vector<vector<double>>& expected_counts,
     return max_change;
 }
 
-// Main learning function with two-phase approach
+
 void learn_parameters(network& net, const vector<Record>& records, 
                      double convergence_threshold = 1e-8,
                      double alpha = 0.5) {
     
-    cout << "Starting parameter learning..." << endl;
-    cout << "Total records: " << records.size() << endl;
-    cout << "Alpha (Laplace smoothing): " << alpha << endl;
-    cout << "Convergence threshold: " << convergence_threshold << endl;
     
-    // Separate complete and incomplete records
     vector<Record> complete_records;
     vector<Record> incomplete_records;
     
@@ -698,61 +673,45 @@ void learn_parameters(network& net, const vector<Record>& records,
         }
     }
     
-    cout << "Complete records: " << complete_records.size() << endl;
-    cout << "Incomplete records: " << incomplete_records.size() << endl;
-    
-    // Identify which parameters need learning BEFORE any modification
-    cout << "\nIdentifying parameters to learn..." << endl;
     vector<vector<bool>> learn_mask = identify_learning_params(net);
     
     auto start_time = chrono::high_resolution_clock::now();
     
-    // === PHASE 1: Initialize from complete records ===
-    cout << "\n=== PHASE 1: Initialization ===" << endl;
-    
     if (!complete_records.empty()) {
-        // First, initialize any unknown parameters to uniform
+        
         initialize_to_uniform(net, learn_mask);
         
-        // Then learn from complete records
+        
         initialize_from_complete_records(net, complete_records, learn_mask, alpha);
     } else {
-        cout << "  No complete records found. Initializing to uniform distribution." << endl;
         initialize_to_uniform(net, learn_mask);
     }
     
     auto phase1_time = chrono::high_resolution_clock::now();
     auto phase1_duration = chrono::duration_cast<chrono::milliseconds>(phase1_time - start_time);
-    cout << "Phase 1 completed in " << phase1_duration.count() << " ms" << endl;
-    
-    // === PHASE 2: EM Refinement on all records ===
-    cout << "\n=== PHASE 2: EM Refinement ===" << endl;
     
     int N = net.netSize();
     vector<vector<double>> expected_counts(N);
     
     const int min_iterations = 15;
-    const int max_iterations = 100;
-    const double max_time_seconds = 110.0;  // Time limit
+    const double max_time_seconds = 110.0;  
     
     int iter = 0;
     
-    while (iter < max_iterations) {
+    while (true) {
         auto iter_start = chrono::high_resolution_clock::now();
         
-        // Check time limit
+        
         auto elapsed = chrono::duration_cast<chrono::milliseconds>(iter_start - start_time);
         double elapsed_seconds = elapsed.count() / 1000.0;
         if (elapsed_seconds > max_time_seconds) {
             cout << "Time limit of " << max_time_seconds << " seconds reached after " 
                  << iter << " iterations" << endl;
             break;
-        }
+        }      
         
-        // E-step
         em_e_step(net, records, expected_counts, alpha);
-        
-        // M-step
+          
         double max_change = em_m_step(net, expected_counts, learn_mask);
         
         auto iter_end = chrono::high_resolution_clock::now();
@@ -766,21 +725,16 @@ void learn_parameters(network& net, const vector<Record>& records,
                  << " (time: " << iter_duration.count() << " ms)" << endl;
         }
         
-        // Check convergence (but enforce minimum iterations)
+        
         if (iter >= min_iterations && max_change < convergence_threshold) {
             cout << "Converged after " << iter << " iterations!" << endl;
             break;
         }
     }
     
-    if (iter >= max_iterations) {
-        cout << "Reached maximum iterations (" << max_iterations << ")" << endl;
-    }
-    
     auto end_time = chrono::high_resolution_clock::now();
     auto total_duration = chrono::duration_cast<chrono::seconds>(end_time - start_time);
-    cout << "\nTotal learning time: " << total_duration.count() << " seconds" << endl;
-    cout << "Total EM iterations: " << iter << endl;
+   
 }
 
 int main(int argc, char* argv[]) {
@@ -791,9 +745,8 @@ int main(int argc, char* argv[]) {
     
     const char* network_file = argv[1];
     const char* data_file = argv[2];
-    const char* output_file = (argc >= 4) ? argv[3] : "solved_hailfinder.bif";
-    
-    cout << "Reading Bayesian Network from " << network_file << "..." << endl;
+    const char* output_file = (argc >= 4) ? argv[3] : "solved_hailfinder.bif";   
+   
     network BayesNet = read_network(network_file);
     
     if (BayesNet.netSize() == 0) {
@@ -801,26 +754,16 @@ int main(int argc, char* argv[]) {
         return 1;
     }
     
-    cout << "Network loaded: " << BayesNet.netSize() << " nodes" << endl;
-    
-    cout << "\nReading data records from " << data_file << "..." << endl;
     vector<Record> records = read_records(data_file, BayesNet.netSize());
     
     if (records.empty()) {
-        cout << "Failed to read records!" << endl;
         return 1;
-    }
+    }   
     
-    cout << "Data loaded: " << records.size() << " records" << endl;
-    
-    // Learn parameters
     learn_parameters(BayesNet, records);
     
-    // Write output
     cout << "\nWriting learned network to " << output_file << "..." << endl;
     write_network(output_file, BayesNet);
-    
-    cout << "\nDone!" << endl;
     
     return 0;
 }
