@@ -2,7 +2,6 @@
 #include "starter.cpp"
 #include <algorithm>
 #include <chrono>
-#include <cmath>
 
 using namespace std;
 
@@ -142,10 +141,55 @@ vector<vector<bool>> identify_learning_params(network& net) {
     return learn_mask;
 }
 
-// Initialize CPT from complete records using MLE with Laplace smoothing
-void initialize_cpt_from_complete(network& net, const vector<Record>& records, 
-                                  const vector<vector<bool>>& learn_mask, double alpha) {
+// Initialize unknown parameters to uniform distribution
+void initialize_to_uniform(network& net, const vector<vector<bool>>& learn_mask) {
     int N = net.netSize();
+    
+    for (int i = 0; i < N; i++) {
+        auto node = net.get_nth_node(i);
+        auto parents = node->get_Parents();
+        auto values = node->get_values();
+        vector<float> cpt = node->get_CPT();
+        
+        int parent_combinations = 1;
+        for (const auto& pname : parents) {
+            parent_combinations *= net.search_node(pname)->get_nvalues();
+        }
+        
+        // For each parent configuration
+        for (int pc = 0; pc < parent_combinations; pc++) {
+            // Check if this configuration needs initialization
+            bool needs_init = false;
+            for (int k = 0; k < values.size(); k++) {
+                int idx = pc * values.size() + k;
+                if (cpt[idx] < 0) {
+                    needs_init = true;
+                    break;
+                }
+            }
+            
+            if (needs_init) {
+                // Initialize to uniform distribution over child values
+                float uniform_prob = 1.0f / values.size();
+                for (int k = 0; k < values.size(); k++) {
+                    int idx = pc * values.size() + k;
+                    if (cpt[idx] < 0) {
+                        cpt[idx] = uniform_prob;
+                    }
+                }
+            }
+        }
+        
+        node->set_CPT(cpt);
+    }
+}
+
+// Initialize CPT from COMPLETE records only using MLE with Laplace smoothing
+void initialize_from_complete_records(network& net, const vector<Record>& complete_records, 
+                                      const vector<vector<bool>>& learn_mask, double alpha) {
+    int N = net.netSize();
+    
+    cout << "  Initializing from " << complete_records.size() << " complete records..." << endl;
     
     // For each node, count occurrences
     for (int i = 0; i < N; i++) {
@@ -178,36 +222,23 @@ void initialize_cpt_from_complete(network& net, const vector<Record>& records,
         // Initialize counts with Laplace smoothing
         vector<double> counts(cpt.size(), alpha);
         
-        // Count from ALL records - use uniform distribution for missing values
-        for (const auto& rec : records) {
-            // Skip if this node itself is missing
-            if (rec.missing_index == i) continue;
-            
+        // Count from COMPLETE records only
+        for (const auto& rec : complete_records) {
             // Get parent values
             vector<int> parent_indices;
             bool valid = true;
-            bool has_missing_parent = false;
-            int missing_parent_pos = -1;
             
-            for (int p = 0; p < parents.size(); p++) {
-                const auto& pname = parents[p];
+            for (const auto& pname : parents) {
                 int parent_idx = net.get_index(pname);
+                auto pnode = net.search_node(pname);
+                auto pvals = pnode->get_values();
                 
-                if (rec.missing_index == parent_idx) {
-                    has_missing_parent = true;
-                    missing_parent_pos = p;
-                    parent_indices.push_back(0); // placeholder
-                } else {
-                    auto pnode = net.search_node(pname);
-                    auto pvals = pnode->get_values();
-                    
-                    int val_idx = get_value_index(pvals, rec.values[parent_idx]);
-                    if (val_idx < 0) {
-                        valid = false;
-                        break;
-                    }
-                    parent_indices.push_back(val_idx);
+                int val_idx = get_value_index(pvals, rec.values[parent_idx]);
+                if (val_idx < 0) {
+                    valid = false;
+                    break;
                 }
+                parent_indices.push_back(val_idx);
             }
             
             if (!valid) continue;
@@ -216,28 +247,11 @@ void initialize_cpt_from_complete(network& net, const vector<Record>& records,
             int child_val_idx = get_value_index(values, rec.values[i]);
             if (child_val_idx < 0) continue;
             
-            // If a parent is missing, distribute uniformly across its possible values
-            if (has_missing_parent) {
-                int mp_idx = net.get_index(parents[missing_parent_pos]);
-                auto mp_node = net.search_node(parents[missing_parent_pos]);
-                int num_mp_values = mp_node->get_nvalues();
-                double weight = 1.0 / num_mp_values;
-                
-                for (int mp_val = 0; mp_val < num_mp_values; mp_val++) {
-                    parent_indices[missing_parent_pos] = mp_val;
-                    int cpt_idx = compute_cpt_index_v2(parent_radices, parent_indices, 
-                                                       child_val_idx, values.size());
-                    if (cpt_idx >= 0 && cpt_idx < counts.size()) {
-                        counts[cpt_idx] += weight;
-                    }
-                }
-            } else {
-                // All parents observed - full count
-                int cpt_idx = compute_cpt_index_v2(parent_radices, parent_indices, 
-                                                   child_val_idx, values.size());
-                if (cpt_idx >= 0 && cpt_idx < counts.size()) {
-                    counts[cpt_idx] += 1.0;
-                }
+            // Full count - no weighting needed
+            int cpt_idx = compute_cpt_index_v2(parent_radices, parent_indices, 
+                                               child_val_idx, values.size());
+            if (cpt_idx >= 0 && cpt_idx < counts.size()) {
+                counts[cpt_idx] += 1.0;
             }
         }
         
@@ -250,8 +264,12 @@ void initialize_cpt_from_complete(network& net, const vector<Record>& records,
             for (int k = 0; k < values.size(); k++) {
                 sum += counts[k];
             }
+            
+            const double epsilon = 1e-10;
+            sum = max(sum, epsilon);
+            
             for (int k = 0; k < values.size(); k++) {
-                if (learn_mask[i][k]) { // only update if needs learning
+                if (learn_mask[i][k]) {
                     new_cpt[k] = counts[k] / sum;
                 }
             }
@@ -263,9 +281,13 @@ void initialize_cpt_from_complete(network& net, const vector<Record>& records,
                     int idx = pc * values.size() + k;
                     sum += counts[idx];
                 }
+                
+                const double epsilon = 1e-10;
+                sum = max(sum, epsilon);
+                
                 for (int k = 0; k < values.size(); k++) {
                     int idx = pc * values.size() + k;
-                    if (learn_mask[i][idx]) { // only update if needs learning
+                    if (learn_mask[i][idx]) {
                         new_cpt[idx] = counts[idx] / sum;
                     }
                 }
@@ -276,18 +298,74 @@ void initialize_cpt_from_complete(network& net, const vector<Record>& records,
     }
 }
 
+// Compute probability of a parent taking a specific value given the evidence
+double get_parent_probability(network& net, const Record& rec, 
+                              const string& parent_name, int parent_value_idx) {
+    int parent_idx = net.get_index(parent_name);
+    auto parent_node = net.search_node(parent_name);
+    auto parent_parents = parent_node->get_Parents();
+    auto parent_cpt = parent_node->get_CPT();
+    
+    // If parent has no parents, use prior
+    if (parent_parents.empty()) {
+        if (parent_value_idx >= 0 && parent_value_idx < parent_cpt.size()) {
+            return parent_cpt[parent_value_idx];
+        }
+        return 1.0 / parent_node->get_nvalues(); // fallback to uniform
+    }
+    
+    // Parent has parents - compute conditional probability
+    vector<int> pp_indices;
+    vector<int> pp_radices;
+    bool valid = true;
+    
+    for (const auto& pp_name : parent_parents) {
+        int pp_idx = net.get_index(pp_name);
+        auto pp_node = net.search_node(pp_name);
+        auto pp_values = pp_node->get_values();
+        
+        // Check if this grandparent is observed
+        if (rec.missing_index == pp_idx) {
+            // Grandparent is missing - can't compute exact probability
+            // Fall back to uniform
+            return 1.0 / parent_node->get_nvalues();
+        }
+        
+        int pp_val_idx = get_value_index(pp_values, rec.values[pp_idx]);
+        if (pp_val_idx < 0) {
+            valid = false;
+            break;
+        }
+        pp_indices.push_back(pp_val_idx);
+        pp_radices.push_back(pp_values.size());
+    }
+    
+    if (!valid) {
+        return 1.0 / parent_node->get_nvalues(); // fallback
+    }
+    
+    // Compute CPT index
+    int cpt_idx = compute_cpt_index_v2(pp_radices, pp_indices, 
+                                       parent_value_idx, parent_node->get_nvalues());
+    
+    if (cpt_idx >= 0 && cpt_idx < parent_cpt.size() && parent_cpt[cpt_idx] >= 0) {
+        return parent_cpt[cpt_idx];
+    }
+    
+    return 1.0 / parent_node->get_nvalues(); // fallback
+}
+
 // Compute P(missing_var = value | Markov Blanket evidence) using Bayes' rule
-// Markov blanket = parents + children + co-parents (other parents of children)
+// Uses LOG-SPACE to prevent numerical underflow
 double compute_markov_blanket_probability(network& net, int missing_var_idx, int value_idx,
                                           const Record& record, const vector<string>& all_possible_values) {
     auto missing_node = net.get_nth_node(missing_var_idx);
     vector<string> parents = missing_node->get_Parents();
     vector<int> children = missing_node->get_children();
     
-    double prob = 1.0;
+    double log_prob = 0.0;  // Use log-space
     
     // Part 1: P(missing_var = value | parents)
-    // Get parent indices and values
     vector<int> parent_val_indices;
     bool valid_parents = true;
     for (const auto& pname : parents) {
@@ -314,7 +392,12 @@ double compute_markov_blanket_probability(network& net, int missing_var_idx, int
                                            value_idx, all_possible_values.size());
         vector<float> cpt = missing_node->get_CPT();
         if (cpt_idx >= 0 && cpt_idx < cpt.size()) {
-            prob *= cpt[cpt_idx];
+            double prob = cpt[cpt_idx];
+            if (prob > 0) {
+                log_prob += log(prob);
+            } else {
+                log_prob += log(1e-10); // Small value to avoid -infinity
+            }
         }
     }
     
@@ -327,7 +410,7 @@ double compute_markov_blanket_probability(network& net, int missing_var_idx, int
         // Get the observed value of this child
         string child_observed_val = record.values[child_idx];
         int child_val_idx = get_value_index(child_values, child_observed_val);
-        if (child_val_idx < 0) continue; // Child value is missing or invalid
+        if (child_val_idx < 0) continue;
         
         // Build parent configuration for the child
         vector<int> child_parent_radices;
@@ -362,12 +445,17 @@ double compute_markov_blanket_probability(network& net, int missing_var_idx, int
                                                      child_val_idx, child_values.size());
             vector<float> child_cpt = child_node->get_CPT();
             if (child_cpt_idx >= 0 && child_cpt_idx < child_cpt.size()) {
-                prob *= child_cpt[child_cpt_idx];
+                double child_prob = child_cpt[child_cpt_idx];
+                if (child_prob > 0) {
+                    log_prob += log(child_prob);
+                } else {
+                    log_prob += log(1e-10);
+                }
             }
         }
     }
     
-    return prob;
+    return exp(log_prob);  // Convert back from log-space
 }
 
 // EM Algorithm - E-step: compute expected counts from incomplete records
@@ -548,6 +636,10 @@ double em_m_step(network& net, const vector<vector<double>>& expected_counts,
             for (int k = 0; k < values.size(); k++) {
                 sum += expected_counts[i][k];
             }
+
+            const double epsilon = 1e-10;
+            sum = max(sum, epsilon);
+
             for (int k = 0; k < values.size(); k++) {
                 if (learn_mask[i][k]) {
                     float new_val = expected_counts[i][k] / sum;
@@ -563,6 +655,10 @@ double em_m_step(network& net, const vector<vector<double>>& expected_counts,
                     int idx = pc * values.size() + k;
                     sum += expected_counts[i][idx];
                 }
+
+                const double epsilon = 1e-10;
+                sum = max(sum, epsilon);
+
                 for (int k = 0; k < values.size(); k++) {
                     int idx = pc * values.size() + k;
                     if (learn_mask[i][idx]) {
@@ -580,137 +676,71 @@ double em_m_step(network& net, const vector<vector<double>>& expected_counts,
     return max_change;
 }
 
-// Post-normalization to correct floating point imbalances in CPT rows.
-// eps: small threshold below which a row is considered zero and replaced by uniform.
-void normalize_cpts(network& net, double eps = 1e-12) {
-    int N = net.netSize();
-    for (int i = 0; i < N; i++) {
-        auto node = net.get_nth_node(i);
-        vector<string> parents = node->get_Parents();
-        vector<string> values = node->get_values();
-        vector<float> cpt = node->get_CPT();
-
-        int child_n = values.size();
-        // Compute parent combinations
-        int parent_combinations = 1;
-        for (const auto& pname : parents) {
-            auto pnode = net.search_node(pname);
-            parent_combinations *= pnode->get_nvalues();
-        }
-
-        vector<float> new_cpt = cpt;
-
-        if (parents.empty()) {
-            // Unconditional
-            double sum = 0.0;
-            for (int k = 0; k < child_n; k++) sum += cpt[k];
-
-            if (!isfinite(sum) || fabs(sum) <= eps) {
-                // Replace with uniform
-                for (int k = 0; k < child_n; k++) new_cpt[k] = 1.0f / child_n;
-            } else {
-                double s = 0.0;
-                for (int k = 0; k < child_n; k++) {
-                    new_cpt[k] = (float)(cpt[k] / sum);
-                    s += new_cpt[k];
-                }
-                // Fix tiny rounding error to make sum exactly 1.0
-                double diff = 1.0 - s;
-                if (fabs(diff) > 1e-15) {
-                    new_cpt[child_n - 1] = (float)max(0.0, (double)new_cpt[child_n - 1] + diff);
-                }
-            }
-        } else {
-            // Conditional: normalize each parent configuration row
-            for (int pc = 0; pc < parent_combinations; pc++) {
-                double sum = 0.0;
-                int base = pc * child_n;
-                for (int k = 0; k < child_n; k++) sum += cpt[base + k];
-
-                if (!isfinite(sum) || fabs(sum) <= eps) {
-                    // Uniform for this parent configuration
-                    for (int k = 0; k < child_n; k++) new_cpt[base + k] = 1.0f / child_n;
-                } else {
-                    double s = 0.0;
-                    for (int k = 0; k < child_n; k++) {
-                        new_cpt[base + k] = (float)(cpt[base + k] / sum);
-                        s += new_cpt[base + k];
-                    }
-                    double diff = 1.0 - s;
-                    if (fabs(diff) > 1e-15) {
-                        int last_idx = base + child_n - 1;
-                        new_cpt[last_idx] = (float)max(0.0, (double)new_cpt[last_idx] + diff);
-                    }
-                }
-            }
-        }
-
-        node->set_CPT(new_cpt);
-    }
-}
-
-// Main learning function
+// Main learning function with two-phase approach
 void learn_parameters(network& net, const vector<Record>& records, 
-                     double convergence_threshold = 1e-7,
-                     double alpha = 0.4) {
+                     double convergence_threshold = 1e-8,
+                     double alpha = 0.5) {
     
     cout << "Starting parameter learning..." << endl;
     cout << "Total records: " << records.size() << endl;
+    cout << "Alpha (Laplace smoothing): " << alpha << endl;
+    cout << "Convergence threshold: " << convergence_threshold << endl;
     
-    int complete_count = 0;
+    // Separate complete and incomplete records
+    vector<Record> complete_records;
+    vector<Record> incomplete_records;
+    
     for (const auto& rec : records) {
-        if (rec.missing_index < 0) complete_count++;
+        if (rec.missing_index < 0) {
+            complete_records.push_back(rec);
+        } else {
+            incomplete_records.push_back(rec);
+        }
     }
-    cout << "Complete records: " << complete_count << endl;
-    cout << "Incomplete records: " << (records.size() - complete_count) << endl;
+    
+    cout << "Complete records: " << complete_records.size() << endl;
+    cout << "Incomplete records: " << incomplete_records.size() << endl;
     
     // Identify which parameters need learning BEFORE any modification
     cout << "\nIdentifying parameters to learn..." << endl;
     vector<vector<bool>> learn_mask = identify_learning_params(net);
     
-    // Initialize from all records (missing values treated uniformly)
     auto start_time = chrono::high_resolution_clock::now();
-    cout << "Initializing parameters from all records (uniform distribution for missing values)..." << endl;
-    initialize_cpt_from_complete(net, records, learn_mask, alpha);
     
-    auto init_time = chrono::high_resolution_clock::now();
-    auto duration = chrono::duration_cast<chrono::milliseconds>(init_time - start_time);
-    cout << "Initialization completed in " << duration.count() << " ms" << endl;
+    // === PHASE 1: Initialize from complete records ===
+    cout << "\n=== PHASE 1: Initialization ===" << endl;
     
-    // Pseudo-EM Initialization: Run 2 light EM iterations to refine initial estimates
-    cout << "\nRunning Pseudo-EM initialization (2 light iterations)..." << endl;
+    if (!complete_records.empty()) {
+        // First, initialize any unknown parameters to uniform
+        initialize_to_uniform(net, learn_mask);
+        
+        // Then learn from complete records
+        initialize_from_complete_records(net, complete_records, learn_mask, alpha);
+    } else {
+        cout << "  No complete records found. Initializing to uniform distribution." << endl;
+        initialize_to_uniform(net, learn_mask);
+    }
+    
+    auto phase1_time = chrono::high_resolution_clock::now();
+    auto phase1_duration = chrono::duration_cast<chrono::milliseconds>(phase1_time - start_time);
+    cout << "Phase 1 completed in " << phase1_duration.count() << " ms" << endl;
+    
+    // === PHASE 2: EM Refinement on all records ===
+    cout << "\n=== PHASE 2: EM Refinement ===" << endl;
+    
     int N = net.netSize();
     vector<vector<double>> expected_counts(N);
     
-    for (int pre_iter = 0; pre_iter < 2; pre_iter++) {
-        auto pseudo_start = chrono::high_resolution_clock::now();
-        
-        // E-step on incomplete records only
-        em_e_step(net, records, expected_counts, alpha);
-        
-        // M-step
-        double max_change = em_m_step(net, expected_counts, learn_mask);
-        
-        auto pseudo_end = chrono::high_resolution_clock::now();
-        auto pseudo_duration = chrono::duration_cast<chrono::milliseconds>(pseudo_end - pseudo_start);
-        
-        cout << "  Pseudo-EM iteration " << (pre_iter + 1) 
-             << ": max change = " << fixed << setprecision(6) << max_change
-             << " (time: " << pseudo_duration.count() << " ms)" << endl;
-    }
+    const int min_iterations = 15;
+    const int max_iterations = 100;
+    const double max_time_seconds = 110.0;  // Time limit
     
-    auto pseudo_total = chrono::high_resolution_clock::now();
-    auto pseudo_total_duration = chrono::duration_cast<chrono::milliseconds>(pseudo_total - init_time);
-    cout << "Pseudo-EM initialization completed in " << pseudo_total_duration.count() << " ms" << endl;
-    
-    // Main EM iterations
     int iter = 0;
-    const double max_time_seconds = 114.0;  // Time limit in seconds
     
-    while (true) {
+    while (iter < max_iterations) {
         auto iter_start = chrono::high_resolution_clock::now();
         
-        // Check time limit first
+        // Check time limit
         auto elapsed = chrono::duration_cast<chrono::milliseconds>(iter_start - start_time);
         double elapsed_seconds = elapsed.count() / 1000.0;
         if (elapsed_seconds > max_time_seconds) {
@@ -730,40 +760,27 @@ void learn_parameters(network& net, const vector<Record>& records,
         
         iter++;
         
-        // Apply alpha decay for weighted convergence (helps refine small probabilities)
-        alpha *= 0.95;
-        
-        // Log iteration info (include alpha every 10 iterations)
-        if (iter % 10 == 0 || iter == 1) {
-            cout << "Iteration " << iter << ": max parameter change = " 
-                 << fixed << setprecision(8) << max_change 
-                 << ", alpha = " << setprecision(6) << alpha
-                 << " (time: " << iter_duration.count() << " ms)" << endl;
-        } else {
+        if (iter <= 5 || iter % 5 == 0 || max_change < convergence_threshold) {
             cout << "Iteration " << iter << ": max parameter change = " 
                  << fixed << setprecision(8) << max_change 
                  << " (time: " << iter_duration.count() << " ms)" << endl;
         }
         
-        // Check convergence
-        if (max_change < convergence_threshold) {
-            cout << "Converged after " << iter << " iterations (final alpha = " 
-                 << setprecision(6) << alpha << ")" << endl;
+        // Check convergence (but enforce minimum iterations)
+        if (iter >= min_iterations && max_change < convergence_threshold) {
+            cout << "Converged after " << iter << " iterations!" << endl;
             break;
         }
+    }
+    
+    if (iter >= max_iterations) {
+        cout << "Reached maximum iterations (" << max_iterations << ")" << endl;
     }
     
     auto end_time = chrono::high_resolution_clock::now();
     auto total_duration = chrono::duration_cast<chrono::seconds>(end_time - start_time);
     cout << "\nTotal learning time: " << total_duration.count() << " seconds" << endl;
-
-    // Post-normalization to fix tiny numeric imbalances in CPT rows
-    cout << "Post-normalizing CPT rows with eps=1e-12 to correct floating-point noise..." << endl;
-    auto norm_start = chrono::high_resolution_clock::now();
-    normalize_cpts(net, 1e-12);
-    auto norm_end = chrono::high_resolution_clock::now();
-    auto norm_duration = chrono::duration_cast<chrono::milliseconds>(norm_end - norm_start);
-    cout << "Post-normalization completed in " << norm_duration.count() << " ms" << endl;
+    cout << "Total EM iterations: " << iter << endl;
 }
 
 int main(int argc, char* argv[]) {
